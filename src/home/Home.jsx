@@ -10,7 +10,14 @@ import { AiFillPrinter } from "react-icons/ai";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
-
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+} from "firebase/firestore";
+import { db } from "../firebase/firebase";
 
 const Home = () => {
   const fileInputRef = useRef(null);
@@ -19,7 +26,7 @@ const Home = () => {
   const [idNumber, setIdNumber] = useState(
     Math.floor(100000 + Math.random() * 900000)
   );
-  const [mode, setMode] = useState("light");
+  // const [mode, setMode] = useState("light");
   const [invoiceDate, setInvoiceDate] = useState(new Date());
   const formattedInvoiceDate = `${invoiceDate
     .getDate()
@@ -55,36 +62,115 @@ const Home = () => {
     },
   ]);
 
-  const [invoices, setInvoices] = useState([]);
+  // const [invoices, setInvoices] = useState([]);
   const [currentInvoice, setCurrentInvoice] = useState(rows);
+  const [saveInvoice, setSaveInvoice] = useState([]);
 
-  const handleSaveInvoice = () => {
-    // Assuming you generate a new ID for each new invoice
+
+
+  // Example handleSaveInvoice function
+  const handleSaveInvoice = async () => {
     const newInvoice = {
-      id: idNumber,  // 4 digit number
-      invoice: invoice, 
-      invoiceDate: formattedInvoiceDate, 
-      dueDat: formattedDueDat,
-      invoiceFrom: invoiceFrom, 
-      invoiceTo: invoiceTo, 
-      termsAndConditions: termsAndConditions, 
+      idNum: idNumber, // Assuming idNumber is your custom identifier
+      invoice: invoice,
+      invoiceDate: formattedInvoiceDate,
+      dueDate: formattedDueDat,
+      invoiceFrom: invoiceFrom,
+      invoiceTo: invoiceTo,
+      termsAndConditions: termsAndConditions,
       footNote: footNote,
-      image: image, 
-      rows: rows, 
-      itemValue: itemValue, 
-      discounts: discounts, 
+      image: image,
+      rows: rows,
+      itemValue: itemValue,
+      discounts: discounts,
       shipping: shipping,
     };
   
-    setCurrentInvoice(newInvoice); 
-    setInvoices([...invoices, newInvoice]); 
+    try {
+      // Add new invoice to Firestore
+      const docRef = await addDoc(collection(db, "invoices"), {
+        ...newInvoice,
+      });
+  
+      // Log the document ID to console
+      // console.log("Invoice written with ID: ", docRef.id);
+  
+      // Update local state with current invoice and ID
+      const invoiceWithId = {
+        ...newInvoice,
+        uid: docRef.id, // Store docRef.id as uid
+      };
+  
+      setCurrentInvoice(invoiceWithId);
+  
+      // Update list of saved invoices
+      setSaveInvoice((prevInvoices) => [...prevInvoices, invoiceWithId]);
+  
+    } catch (error) {
+      console.error("Error adding invoice: ", error);
+    }
   };
 
-  useEffect(()=>{
-    console.log("raju",currentInvoice)
 
-  },[currentInvoice])
+  useEffect(() => {
+    const fetchInvoices = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "invoices"));
+        const invoices = [];
+        querySnapshot.forEach((doc) => {
+          invoices.push({
+            idNum: doc.data().idNum,
+            invoice: doc.data().invoice,
+            invoiceDate: doc.data().invoiceDate,
+            dueDate: doc.data().dueDate,
+            invoiceFrom: doc.data().invoiceFrom,
+            invoiceTo: doc.data().invoiceTo,
+            termsAndConditions: doc.data().termsAndConditions,
+            footNote: doc.data().footNote,
+            image: doc.data().image,
+            rows: doc.data().rows,
+            itemValue: doc.data().itemValue,
+            discounts: doc.data().discounts,
+            shipping: doc.data().shipping,
+            uid: doc.id, // Ensure you capture the document ID as uid
+          });
+        });
+        setSaveInvoice(invoices);
+      } catch (error) {
+        console.error("Error fetching invoices: ", error);
+      }
+    };
+  
+    fetchInvoices();
+  }, []);
+  
 
+  const handleDeleteInvoice = async (invoiceId) => {
+    try {
+      // console.log("Deleting invoice with ID: ", invoiceId);
+  
+      // Delete invoice from Firestore
+      await deleteDoc(doc(db, "invoices", invoiceId));
+      // console.log("Invoice deleted successfully");
+  
+      // Update saveInvoice state to remove the deleted invoice
+      setSaveInvoice((prevInvoices) =>
+        prevInvoices.filter((invoice) => invoice.uid !== invoiceId)
+      );
+    } catch (error) {
+      console.error("Error deleting invoice: ", error);
+    }
+  };
+
+  
+
+  useEffect(() => {
+    // console.log("useEffect-saveInvoice: ", saveInvoice);
+  }, [saveInvoice]);
+  
+  
+
+  useEffect(() => {}, [currentInvoice]);
 
   const resetForm = () => {
     setIdNumber(Math.floor(100000 + Math.random() * 900000));
@@ -96,33 +182,30 @@ const Home = () => {
     setTermsAndConditions("");
     setFootNote("");
     setImage(null);
-    setRows(
-      [
-        {
-          id: 1,
-          item: "",
-          quantity: "0",
-          rate: "0",
-          gst: "0",
-          amount: "0",
-        },
-      ]
-    );
+    setRows([
+      {
+        id: 1,
+        item: "",
+        quantity: "0",
+        rate: "0",
+        gst: "0",
+        amount: "0",
+      },
+    ]);
     setItemValue(0);
     setDiscounts(0);
     setShipping(0);
   };
-  
 
-  const toggleMode = () => {
-    if (mode === "light") {
-      setMode("dark");
-      document.body.style.backgroundColor = "rgb(17,24,39)";
-    } else {
-      setMode("light");
-      document.body.style.backgroundColor = "white";
-    }
-  };
+  // const toggleMode = () => {
+  //   if (mode === "light") {
+  //     setMode("dark");
+  //     document.body.style.backgroundColor = "rgb(17,24,39)";
+  //   } else {
+  //     setMode("light");
+  //     document.body.style.backgroundColor = "white";
+  //   }
+  // };
 
   // add row function
   const handleAddRow = () => {
@@ -173,7 +256,6 @@ const Home = () => {
     updateAmount(rowIndex);
   };
 
-
   const updateAmount = (rowIndex) => {
     const updatedRows = [...rows];
     const row = updatedRows[rowIndex];
@@ -193,7 +275,6 @@ const Home = () => {
     setItemValue(newTotalAmount.toFixed(2)); // Update total amount state
   };
 
-
   const handleRemoveRow = (id) => {
     // Filter out the row with the given id
     const updatedRows = rows.filter((row) => row.id !== id);
@@ -211,14 +292,21 @@ const Home = () => {
     setItemValue(newTotalAmount.toFixed(2)); // Update itemValue with new subtotal
   };
 
+  // const [anchorEl, setAnchorEl] = useState(null);
+  const [anchorElArray, setAnchorElArray] = useState(
+    Array(saveInvoice.length).fill(null)
+  );
 
-  const [anchorEl, setAnchorEl] = useState(null);
-  const open = Boolean(anchorEl);
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
+  const handleClick = (event, index) => {
+    const newAnchorElArray = [...anchorElArray];
+    newAnchorElArray[index] = event.currentTarget;
+    setAnchorElArray(newAnchorElArray);
   };
-  const handleClose = () => {
-    setAnchorEl(null);
+
+  const handleClose = (index) => {
+    const newAnchorElArray = [...anchorElArray];
+    newAnchorElArray[index] = null;
+    setAnchorElArray(newAnchorElArray);
   };
 
   // remove image
@@ -254,8 +342,6 @@ const Home = () => {
       setDueDat(""); // Handle case when date is cleared
     }
   };
-
-  
 
   const calculateSubtotal = () => {
     return rows.reduce((total, row) => {
@@ -918,7 +1004,6 @@ const Home = () => {
                           />
                         </td>
                       </tr>
-                     
                     ))}
                   </tbody>
                 </table>
@@ -961,7 +1046,9 @@ const Home = () => {
               <div className="col-span-5 px-">
                 <div className="grid grid-cols-12 items-center gap-3">
                   <div className="col-span-3">
-                    <p className="font-medium  sm:text-[14px] text-[12px]">Subtotal</p>
+                    <p className="font-medium  sm:text-[14px] text-[12px]">
+                      Subtotal
+                    </p>
                   </div>
                   <div className="col-span-9">
                     <input
@@ -997,7 +1084,9 @@ const Home = () => {
                     />
                   </div>
                   <div className="col-span-3">
-                    <p className="font-bold sm:text-[14px] text-[12px]">Total (INR)</p>
+                    <p className="font-bold sm:text-[14px] text-[12px]">
+                      Total (INR)
+                    </p>
                   </div>
                   <div className="col-span-9">
                     <input
@@ -1018,7 +1107,11 @@ const Home = () => {
           </div>
           <div className="col-span-2 bg-[#eee]">
             <div className="p-2 pb-4">
-              <Button  onClick={handleSaveInvoice} className="w-full" variant="contained">
+              <Button
+                onClick={handleSaveInvoice}
+                className="w-full"
+                variant="contained"
+              >
                 save invoice
               </Button>
             </div>
@@ -1059,12 +1152,12 @@ const Home = () => {
               <div className="p-2  flex items-center gap-2">
                 <h6 className="font-semibold">My Invoice</h6>
                 <p className="h-5 w-5 bg-blue-400 rounded-md text-[12px] font-semibold text-white flex items-center justify-center">
-                  0
+                  {saveInvoice.length}
                 </p>
               </div>
               <div className="pr-2 border relative">
                 <Button
-               onClick={resetForm}
+                  onClick={resetForm}
                   className=""
                   sx={{ padding: "1px" }}
                   size="small"
@@ -1083,50 +1176,106 @@ const Home = () => {
               }}
             />
 
-            <div className="px-2 py-3 ">
-              <div className="flex px-4 justify-between py-3 border border-gray-500 bg-[#1976d2] rounded-md text-white items-center">
-                <h4>{idNumber}</h4>
-                <div>
-                  <button
-                    className="border rounded p-1 hover:bg-white hover:text-black transition-all duration-500"
-                    id="basic-button"
-                    aria-controls={open ? "basic-menu" : undefined}
-                    aria-haspopup="true"
-                    aria-expanded={open ? "true" : undefined}
-                    onClick={handleClick}
-                  >
-                    <MoreVertIcon className="p-1" />
-                  </button>
-                  <Menu
-                    id="basic-menu"
-                    anchorEl={anchorEl}
-                    open={open}
-                    onClose={handleClose}
-                    MenuListProps={{
-                      "aria-labelledby": "basic-button",
-                    }}
-                  >
-                    <MenuItem onClick={handleDownloadPdf}>Download</MenuItem>
-                    <MenuItem onClick={handleOpenPdf}>Open PDF</MenuItem>
-                    <MenuItem onClick={handlePrintPdf}>Print</MenuItem>
-                    <Divider />
-                    <MenuItem
-                      sx={{
-                        background: "red",
-                        color: "white",
-                        "&:hover": {
+            {/* {saveInvoice.map((item, index) => (
+              <>
+                <div key={index} className="px-2 py-2 ">
+                  <div className="flex px-2 justify-between py-3 border border-gray-500 bg-[#1976d2] rounded-md text-white items-center">
+                    <h4>{item.id}</h4>
+                    <div>
+                      <button
+                        className="border rounded p-1 hover:bg-white hover:text-black transition-all duration-500"
+                        id="basic-button"
+                        aria-controls={open ? "basic-menu" : undefined}
+                        aria-haspopup="true"
+                        aria-expanded={open ? "true" : undefined}
+                        onClick={handleClick}
+                      >
+                        <MoreVertIcon className="p-1" />
+                      </button>
+                      <Menu
+                        id="basic-menu"
+                        anchorEl={anchorEl}
+                        open={open}
+                        onClose={handleClose}
+                        MenuListProps={{
+                          "aria-labelledby": "basic-button",
+                        }}
+                      >
+                        <MenuItem onClick={handleDownloadPdf}>
+                          Download
+                        </MenuItem>
+                        <MenuItem onClick={handleOpenPdf}>Open PDF</MenuItem>
+                        <MenuItem onClick={handlePrintPdf}>Print</MenuItem>
+                        <Divider />
+                        <MenuItem
+                          sx={{
+                            background: "red",
+                            color: "white",
+                            "&:hover": {
+                              background: "red",
+                              color: "white",
+                            },
+                          }}
+                          onClick={() => handleDeleteInvoice(item.id)}
+                        >
+                          Delete
+                        </MenuItem>
+                      </Menu>
+                    </div>
+                  </div>
+                </div>
+              </>
+            ))} */}
+
+            {saveInvoice.map((item, index) => (
+              <div key={index} className="px-2 py-2 ">
+                <div className="flex px-2 justify-between py-3 border border-gray-500 bg-[#1976d2] rounded-md text-white items-center">
+                  <h4>{item.idNum}</h4>
+                  <div>
+                    <button
+                      className="border rounded p-1 hover:bg-white hover:text-black transition-all duration-500"
+                      id={`basic-button-${index}`}
+                      aria-controls={open ? `basic-menu-${index}` : undefined}
+                      aria-haspopup="true"
+                      // aria-expanded={Boolean(anchorElArray[index]) ? "true" : "false"}
+                      onClick={(event) => handleClick(event, index)}
+                    >
+                      <MoreVertIcon className="p-1" />
+                    </button>
+                    <Menu
+                      id={`basic-menu-${index}`}
+                      anchorEl={anchorElArray[index]}
+                      open={Boolean(anchorElArray[index])}
+                      onClose={() => handleClose(index)}
+                      MenuListProps={{
+                        "aria-labelledby": `basic-button-${index}`,
+                      }}
+                    >
+                      <MenuItem onClick={handleDownloadPdf}>Download</MenuItem>
+                      <MenuItem onClick={handleOpenPdf}>Open PDF</MenuItem>
+                      <MenuItem onClick={handlePrintPdf}>Print</MenuItem>
+                      <Divider />
+                      <MenuItem
+                        sx={{
                           background: "red",
                           color: "white",
-                        },
-                      }}
-                      onClick={handleClose}
-                    >
-                      Delete
-                    </MenuItem>
-                  </Menu>
+                          "&:hover": {
+                            background: "red",
+                            color: "white",
+                          },
+                        }}
+                        onClick={() => {
+                          handleDeleteInvoice(item.uid);
+                          handleClose(index); // Close the menu
+                        }}
+                      >
+                        Delete
+                      </MenuItem>
+                    </Menu>
+                  </div>
                 </div>
               </div>
-            </div>
+            ))}
           </div>
         </div>
       </div>
