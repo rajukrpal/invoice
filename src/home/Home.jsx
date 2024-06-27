@@ -1691,7 +1691,7 @@ const Home = () => {
                 padding: "0px 1px",
               }}
             />
-            <div className="pb-4 pt-2 h-[72vh]  overflow-auto" style={{ scrollbarWidth: 'none', '-ms-overflow-style': 'none' }}>
+            <div className={isSmallScreen ? "pb-4 pt-2 h-[40vh]  overflow-auto" : "pb-4 pt-2 h-[72vh]  overflow-auto"} style={{ scrollbarWidth: 'none', '-ms-overflow-style': 'none' }}>
               {saveInvoice.map((item, index) => (
                 <div key={index} className="px-2 py-1 ">
                   <div onClick={()=>handalAllItemValue(item)} className="cursor-pointer flex px-2 justify-between py-2 border border-gray-500 bg-[#1976d2] hover:bg-blue-500 rounded-md text-white items-center">
