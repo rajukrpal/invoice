@@ -1,3 +1,32 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;  
+
+
+/* body {
+    background-color: black;
+    color: white;
+  } */
+  
+  /* input, */
+  /* textarea, */
+  /* select { */
+    /* background-color: #333 !important; */
+    /* color: white !important; */
+  /* } */
+  
+  /* .react-datepicker {
+    background-color: #333;
+    color: white;
+  } */
+  
+  /* table {
+    background-color: #333;
+    color: white;
+  } */
+  
+  /* table td {
+    border: 1px solid #555; 
+  } */
+  
+ 
