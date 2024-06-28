@@ -26,7 +26,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase/firebase";
 
-const Home = () => {
+const Home = ({ darkMode, toggleDarkMode }) => {
   const fileInputRef = useRef(null);
   const [isImageSelected, setIsImageSelected] = useState(false);
   const [invoice, setInvoice] = useState("Invoice No: ");
@@ -192,16 +192,6 @@ const Home = () => {
     setShipping(0);
   };
 
-  // const toggleMode = () => {
-  //   if (mode === "light") {
-  //     setMode("dark");
-  //     document.body.style.backgroundColor = "rgb(17,24,39)";
-  //   } else {
-  //     setMode("light");
-  //     document.body.style.backgroundColor = "white";
-  //   }
-  // };
-
   // add row function
   const handleAddRow = () => {
     const newRow = {
@@ -329,14 +319,6 @@ const Home = () => {
     setInvoiceDate(date);
     // console.log("Selected invoice date:", date);
   };
-
-  // const handleDueDateChange = (date) => {
-  //   if (date) {
-  //     setDueDat(date); // Update dueDat state with date object
-  //   } else {
-  //     setDueDat(""); // Handle case when date is cleared
-  //   }
-  // };
 
   const handleDueDateChange = (date) => {
     setDueDat(date); // Update dueDat state with date object
@@ -1247,9 +1229,9 @@ const Home = () => {
   const isSmallScreen = useMediaQuery("(max-width:767px)");
   return (
     <>
-      <NavBar />
-      {/* <button onClick={toggleMode}>Mode</button> */}
-      <div className="pt-5 px-2 ">
+      {/* <NavBar /> */}
+      <NavBar darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+      <div className=" px-2 costom-dark-mod">
         <div className="lg:grid grid-cols-12  ">
           <div className="col-span-10 ">
             <div className="lg:grid grid-cols-12 gap-2 px-2">
@@ -1280,7 +1262,7 @@ const Home = () => {
                             </h2>
                           </div>
                           <input
-                            className="border border-blue-500 absolute bottom-0 left-0 w-full h-full opacity-0 cursor-pointer"
+                            className="border border-blue-500 absolute bottom-0 left-0 w-full h-full opacity-0 cursor-pointer "
                             type="file"
                             onChange={handleImageChange}
                           />
@@ -1296,18 +1278,18 @@ const Home = () => {
                     <div className="flex mb-3">
                       <input
                         type="text"
-                        className="border border-gray-300 p-2  w-[50%] rounded-l-lg "
+                        className="border border-gray-300 p-2  w-[50%] rounded-l-lg costom-dark-mod-input"
                         placeholder="Invoice"
                         value={invoice}
                         onChange={handleInvoiceChange}
                         aria-label="Username"
                       />
-                      <span className="bg-gray-200 text-gray-700 p-3">#</span>
+                      <span className="bg-gray-200 text-gray-700 p-3 hash costom-dark-mod-input">#</span>
                       <input
                         value={idNumber}
                         onChange={handleidNumberChange}
                         type="number"
-                        className="border border-gray-300 p-2 w-[50%] rounded-r-lg"
+                        className="border border-gray-300 p-2 w-[50%] rounded-r-lg costom-dark-mod-input"
                         placeholder="Id No"
                         aria-label="Server"
                       />
@@ -1319,7 +1301,7 @@ const Home = () => {
                   <div className=" items-center col-span-6 flex pl-8">
                     <label
                       htmlFor="invoiceDate"
-                      className=" text-gray-700 w-40 text-sm "
+                      className=" text-gray-700 w-40 text-sm costom-dark-mod p-2"
                     >
                       Invoice Date:
                     </label>
@@ -1338,7 +1320,7 @@ const Home = () => {
                               value={formattedInvoiceDate} // Ensure to format the date correctly if needed
                               // value={invoiceDate}
                               onChange={handleDateChange} // Handle date changes if needed
-                              className="border border-gray-300 p-2 pl-10 w-full rounded-lg"
+                              className="border border-gray-300 p-2 pl-10 w-full rounded-lg costom-dark-mod-input"
                               placeholder="Select date"
                               aria-label="Invoice Date"
                             />
@@ -1358,7 +1340,7 @@ const Home = () => {
                   <div className=" items-center col-span-6 flex pl-8">
                     <label
                       htmlFor="dueDat"
-                      className=" text-gray-700 w-40 text-sm"
+                      className=" text-gray-700 w-40 text-sm costom-dark-mod"
                     >
                       Due Date:
                     </label>
@@ -1377,7 +1359,7 @@ const Home = () => {
                               onChange={(e) =>
                                 handleDueDateChange(e.target.value)
                               } // Handle date changes if needed
-                              className="border border-gray-300 p-2 pl-10 w-full rounded-lg"
+                              className="border border-gray-300 p-2 pl-10 w-full rounded-lg costom-dark-mod-input"
                               placeholder="DD-MM-YYYY"
                               aria-label="Due Date"
                             />
@@ -1404,7 +1386,7 @@ const Home = () => {
                     value={invoiceFrom}
                     onChange={(e) => setInvoicefrom(e.target.value)}
                     placeholder="Who is this invoice from? (reQuired)"
-                    className="w-full border outline-none h-24 p-2 rounded-lg"
+                    className="w-full border outline-none h-24 p-2 rounded-lg costom-dark-mod-input"
                     name=""
                     id=""
                   ></textarea>
@@ -1417,7 +1399,7 @@ const Home = () => {
                     value={invoiceTo}
                     onChange={(e) => setInvoiceTo(e.target.value)}
                     placeholder="Who is this invoice to? (reQuired)"
-                    className="w-full border outline-none h-24 p-2 rounded-lg"
+                    className="w-full border outline-none h-24 p-2 rounded-lg costom-dark-mod-input"
                     name=""
                     id=""
                   ></textarea>
@@ -1447,7 +1429,7 @@ const Home = () => {
                           key={row.id}
                           className={
                             isSmallScreen
-                              ? "w-full py-3 border rounded-lg grid"
+                              ? "w-full py-3 border rounded-lg grid "
                               : "w-full py-3  border-y-2  "
                           }
                         >
@@ -1470,7 +1452,7 @@ const Home = () => {
                               onChange={(e) => handleItemChange(e, index)}
                               type="text"
                               placeholder="Description of service or product..."
-                              className="w-full border border-gray-300 rounded-md p-1 py-2 outline-none"
+                              className="w-full border border-gray-300 rounded-md p-1 py-2 outline-none costom-dark-mod"
                             />
                           </td>
                           <td className="p-2">
@@ -1479,7 +1461,7 @@ const Home = () => {
                               onChange={(e) => handleQuantityChange(e, index)}
                               type="number"
                               placeholder={isSmallScreen ? "quantity" : "0"}
-                              className="w-full border border-gray-300 rounded-md p-1 py-2 outline-none"
+                              className="w-full border border-gray-300 rounded-md p-1 py-2 outline-none costom-dark-mod"
                             />
                           </td>
                           <td className="p-2">
@@ -1488,7 +1470,7 @@ const Home = () => {
                               onChange={(e) => handleRateChange(e, index)}
                               type="number"
                               placeholder={isSmallScreen ? "Rate" : "0.00"}
-                              className="w-full border border-gray-300 rounded-md p-1 py-2 outline-none"
+                              className="w-full border border-gray-300 rounded-md p-1 py-2 outline-none costom-dark-mod"
                             />
                           </td>
                           <td className="p-2 relative">
@@ -1496,7 +1478,7 @@ const Home = () => {
                               value={row.gst}
                               onChange={(e) => handleGstChange(e, index)}
                               type="number"
-                              className="w-full border border-gray-300 rounded-md p-1 py-2  pr-8 outline-none"
+                              className="w-full border border-gray-300 rounded-md p-1 py-2  pr-8 outline-none costom-dark-mod"
                               placeholder={isSmallScreen ? "GST" : "0"}
                             />
                             <span className="absolute inset-y-0 right-0 flex items-center pr-5 text-gray-400">
@@ -1508,7 +1490,7 @@ const Home = () => {
                               value={row.amount}
                               readOnly
                               type="text"
-                              className="w-full border border-gray-300 rounded-md p-1 py-2 outline-none"
+                              className="w-full border border-gray-300 rounded-md p-1 py-2 outline-none costom-dark-mod"
                               placeholder="0.00"
                             />
                           </td>
@@ -1536,7 +1518,7 @@ const Home = () => {
                     value={termsAndConditions}
                     onChange={(e) => setTermsAndConditions(e.target.value)}
                     placeholder="Terms and conditions - late fees, payment methods, delivery schedule"
-                    className="w-full h-20  p-2 border outline-none rounded-lg"
+                    className="w-full h-20  p-2 border outline-none rounded-lg costom-dark-mod-input"
                     name=""
                     id=""
                   ></textarea>
@@ -1547,7 +1529,7 @@ const Home = () => {
                     value={footNote}
                     onChange={(e) => setFootNote(e.target.value)}
                     placeholder="Thank you for your business"
-                    className="w-full h-20 p-2 border outline-none rounded-lg"
+                    className="w-full h-20 p-2 border outline-none rounded-lg costom-dark-mod-input"
                     name=""
                     id=""
                   ></textarea>
@@ -1564,7 +1546,7 @@ const Home = () => {
                     <input
                       value={itemValue}
                       readOnly
-                      className="w-full p-1 px-2 rounded-lg border outline-none bg-slate-200"
+                      className="w-full p-1 px-2 rounded border outline-none bg-slate-200 costom-dark-mod-input"
                       type="text"
                       placeholder="0.00"
                     />
@@ -1576,7 +1558,7 @@ const Home = () => {
                     <input
                       value={discounts}
                       onChange={handleDiscountChange}
-                      className="w-full p-1 px-2 rounded border outline-none"
+                      className="w-full p-1 px-2 rounded border outline-none costom-dark-mod-input "
                       type="number"
                       placeholder="0.00"
                     />
@@ -1588,7 +1570,7 @@ const Home = () => {
                     <input
                       value={shipping}
                       onChange={handleshippingCharg}
-                      className="w-full p-1 px-2 rounded border outline-none"
+                      className="w-full p-1 px-2 rounded border outline-none costom-dark-mod-input"
                       type="number"
                       placeholder="0.00"
                     />
@@ -1606,7 +1588,7 @@ const Home = () => {
                         parseFloat(discounts) +
                         parseFloat(shipping)
                       ).toFixed(2)}
-                      className="w-full p-1 px-2 rounded bg-slate-200 border outline-none"
+                      className="w-full p-1 px-2 rounded bg-slate-200 border outline-none costom-dark-mod-input"
                       type="text"
                       placeholder="0.00"
                     />
@@ -1615,7 +1597,7 @@ const Home = () => {
               </div>
             </div>
           </div>
-          <div className="col-span-2 bg-[#eee] ">
+          <div className="col-span-2 bg-[#eee] costom-dark-mod-input">
             <div className="p-2 pb-4">
               <Button
                 onClick={handleSaveInvoice}
@@ -1667,7 +1649,7 @@ const Home = () => {
                   {saveInvoice.length}
                 </p>
               </div>
-              <div className="pr-2 border relative text-sm">
+              <div className="pr-2  relative text-sm">
                 <Button
                   onClick={resetForm}
                   className=""

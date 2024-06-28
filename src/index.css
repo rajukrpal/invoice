@@ -29,4 +29,111 @@
     border: 1px solid #555; 
   } */
   
- 
+
+
+
+
+  /* :root {
+    --background: #ffffff;
+    --text-color: #000000;
+    --input-bg: #ffffff;
+    --td-color: #ffffff;
+  }
+  
+  [data-theme='dark'] {
+    --background: #000000;
+    --text-color: #ffffff;
+    --input-bg: #000000;
+    --td-color: #000000;
+  }
+  
+  body {
+    background-color: var(--background);
+    color: var(--text-color);
+  }
+  
+  input[type="text"],
+  input[type="email"],
+  textarea {
+    background-color: var(--input-bg);
+    color: var(--text-color);
+  }
+  
+  td {
+    background-color: var(--td-color);
+    color: var(--text-color);
+  }
+   */
+
+
+
+
+
+  :root {
+    /* --background-light: #ffffff; */
+    /* --background-light: #000000; */
+    --text-color-light: #000000;
+    --input-bg-light: #ffffff;
+    --td-color-light: #ffffff;
+    
+    /* --background-dark: #000; */
+    --text-color-dark: #ffffff;
+    --input-bg-dark: #212529;
+    --costom-color-dark: #000000;
+  }
+  
+  body {
+    background-color: var(--background-light);
+    color: var(--text-color-light);
+  }
+  
+  
+  .dark-theme {
+    --background: var(--background-dark);
+    --text-color: var(--text-color-dark);
+    --input-bg: var(--input-bg-dark);
+    --costom-color: var(--costom-color-dark);
+  }
+  
+
+  .dark-theme body {
+    background-color: var(--background-dark) !important;
+    color: var(--text-color-dark) !important;
+  }
+  
+  
+
+  .dark-theme .costom-dark-mod{
+    background-color: var(--costom-color-dark);
+    color: var(--text-color-dark);
+  }
+  .dark-theme .costom-dark-mod-input{
+    background-color: var(--input-bg-dark);
+    color: var(--text-color-dark);
+    border: 1px solid #212529;
+  }
+
+
+  .dark-theme .hash {
+    background-color: var(--input-bg-dark);
+    color: var(--text-color-dark);
+    border: 1px solid #3f3d3d; /* Example border style */
+  }
+
+
+
+  .container {
+    width: 100%;
+    max-width: 1200px; 
+    margin: 0 auto;
+    padding: 0 20px;
+    background-color: var(--background-light); 
+    color: var(--text-color-light); 
+    
+  }
+
+  .dark-theme .container {
+    background-color: var(--background-dark);
+    color: var(--text-color-dark);
+  }
+
