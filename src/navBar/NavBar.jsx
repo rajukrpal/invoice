@@ -58,7 +58,7 @@ const MaterialUISwitch = styled(Switch)(({ theme }) => ({
   },
 }));
 
-const NavBar = ({ toggleDarkMode }) => {
+const NavBar = ({ toggleDarkMode  }) => {
   const [darkMode, setDarkMode] = useState(false);
   const [showLogo, setShowLogo] = useState(true);
   const [showMenu, setShowMenu] = useState(false);
@@ -192,7 +192,7 @@ const NavBar = ({ toggleDarkMode }) => {
         </div>
       </div>
     </div>
-    <Outlet />
+    {/* <Outlet />   */}
     </>
   );
 };

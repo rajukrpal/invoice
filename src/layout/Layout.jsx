@@ -5,14 +5,12 @@ import { Routes, Route } from 'react-router-dom';
 import Home from '../home/Home';
 import Invoice from '../invoice/Invoice';
 import Setting from '../setteng/Setting';
-// import NavBar from '../navBar/NavBar';
 
-const Layout = ({ darkMode, toggleDarkMode }) => {
+const Layout = ({ darkMode, toggleDarkMode  }) => {
   return (
     <div className={`App ${darkMode ? 'dark-theme' : ''}`}>
-      {/* <NavBar darkMode={darkMode} toggleDarkMode={toggleDarkMode} /> */}
       <Routes>
-        <Route path="/" element={<Home  darkMode={darkMode} />} />
+        <Route path="/" element={<Home darkMode={darkMode} />} />
         <Route path="/invoices" element={<Invoice darkMode={darkMode} />} />
         <Route path="/settings" element={<Setting darkMode={darkMode} />} />
       </Routes>

@@ -25,17 +25,14 @@ import {
   getDocs,
 } from "firebase/firestore";
 import { db } from "../firebase/firebase";
-import Invoice from "../invoice/Invoice";
 
 const Home = ({ darkMode, toggleDarkMode }) => {
-  const [propspasData,setPropspasData] = useState(false)
   const fileInputRef = useRef(null);
   const [isImageSelected, setIsImageSelected] = useState(false);
   const [invoice, setInvoice] = useState("Invoice No: ");
   const [idNumber, setIdNumber] = useState(
     Math.floor(100000 + Math.random() * 900000)
   );
-  // const [mode, setMode] = useState("light");
   const [invoiceDate, setInvoiceDate] = useState(new Date());
   const formattedInvoiceDate = `${invoiceDate
     .getDate()
@@ -67,61 +64,11 @@ const Home = ({ darkMode, toggleDarkMode }) => {
       amount: "0",
     },
   ]);
-const [saveInvoicerrrr ,setSaveInvoicerrrr] = useState([])
-  // const [invoices, setInvoices] = useState([]);
+const [saveInvoiceGetFirebase ,setSaveInvoiceGetFirebase] = useState([])
   const [currentInvoice, setCurrentInvoice] = useState(rows);
   const [saveInvoice, setSaveInvoice] = useState([]);
   let pcId = localStorage.getItem('pcId');
-  const filteredInvoices = saveInvoice.filter(item => item.pcId === pcId);
-
-  // const [filteredInvoices, setFilteredInvoices] = useState([]);
-  // const pcId = localStorage.getItem('pcId');
-
-
-  // const handleSaveInvoice = async () => {
-    
-  //   const newInvoice = {
-  //     idNum: idNumber, // Assuming idNumber is your custom identifier
-  //     invoice: invoice,
-  //     invoiceDate: formattedInvoiceDate,
-  //     dueDate: formattedDueDat,
-  //     invoiceFrom: invoiceFrom,
-  //     invoiceTo: invoiceTo,
-  //     termsAndConditions: termsAndConditions,
-  //     footNote: footNote,
-  //     image: image,
-  //     rows: rows,
-  //     itemValue: itemValue,
-  //     discounts: discounts,
-  //     shipping: shipping,
-  //   };
-
-  //   try {
-  //     // Add new invoice to Firestore
-  //     const docRef = await addDoc(collection(db, "invoices"), {
-  //       ...newInvoice,
-  //     });
-
-  //     // Log the document ID to console
-  //     // console.log("Invoice written with ID: ", docRef.id);
-
-  //     // Update local state with current invoice and ID
-  //     const invoiceWithId = {
-  //       ...newInvoice,
-  //       uid: docRef.id, // Store docRef.id as uid
-  //     };
-
-  //     setCurrentInvoice(invoiceWithId);
-
-  //     // Update list of saved invoices
-  //     setSaveInvoice((prevInvoices) => [...prevInvoices, invoiceWithId]);
-  //   } catch (error) {
-  //     console.error("Error adding invoice: ", error);
-  //   }
-  // };
-
-
-
+  
   const handleSaveInvoice = async () => {
     // Generate or retrieve pcId
     let pcId = localStorage.getItem('pcId');
@@ -132,7 +79,7 @@ const [saveInvoicerrrr ,setSaveInvoicerrrr] = useState([])
   
     // Prepare new invoice object
     const newInvoice = {
-      idNum: idNumber, // Assuming idNumber is your custom identifier
+      idNum: idNumber, 
       invoice: invoice,
       invoiceDate: formattedInvoiceDate,
       dueDate: formattedDueDat,
@@ -154,9 +101,6 @@ const [saveInvoicerrrr ,setSaveInvoicerrrr] = useState([])
         ...newInvoice,
       });
   
-      // Log the document ID to console
-      // console.log("Invoice written with ID: ", docRef.id);
-  
       // Update local state with current invoice and ID
       const invoiceWithId = {
         ...newInvoice,
@@ -166,21 +110,19 @@ const [saveInvoicerrrr ,setSaveInvoicerrrr] = useState([])
       setCurrentInvoice(invoiceWithId);
   
       // Update list of saved invoices
-      setSaveInvoicerrrr((prevInvoices) => [...prevInvoices, invoiceWithId]);
+      setSaveInvoiceGetFirebase((prevInvoices) => [...prevInvoices, invoiceWithId]);
     } catch (error) {
       console.error("Error adding invoice: ", error);
     }
   };
   
 
-  //_____________________________________________________________________________________________________________
   useEffect(() => {
     const fetchInvoices = async () => {
       if (pcId) {
         try {
           // Fetch invoices from Firebase that match the pcId
           const querySnapshot = await getDocs(collection(db, 'invoices'));
-          // console.log("testing",querySnapshot)
           const fetchedInvoices = [];
           
           querySnapshot.forEach(doc => {
@@ -191,7 +133,7 @@ const [saveInvoicerrrr ,setSaveInvoicerrrr] = useState([])
           });
 
           // Update local state with matching invoices
-          setSaveInvoicerrrr(fetchedInvoices);
+          setSaveInvoiceGetFirebase(fetchedInvoices);
 
           // Store matching invoices in localStorage
           localStorage.setItem('saveInvoice', JSON.stringify(fetchedInvoices));
@@ -225,13 +167,12 @@ const [saveInvoicerrrr ,setSaveInvoicerrrr] = useState([])
       pcId = generateUniqueId(); 
       localStorage.setItem('pcId', pcId);
     }
-    console.log('PC ID:', pcId);
+    // console.log('PC ID:', pcId);
   }, []);
   const generateUniqueId = () => {
     return Math.random().toString(36).substr(2, 8); //  2.82 trillion
   };
 
-  //_____________________________________________________________________________________________________________
 
   useEffect(() => {
     const fetchInvoices = async () => {
@@ -274,7 +215,7 @@ const [saveInvoicerrrr ,setSaveInvoicerrrr] = useState([])
       // console.log("Invoice deleted successfully");
 
       // Update saveInvoice state to remove the deleted invoice
-      setSaveInvoice((prevInvoices) =>
+      setSaveInvoiceGetFirebase((prevInvoices) =>
         prevInvoices.filter((invoice) => invoice.uid !== invoiceId)
       );
     } catch (error) {
@@ -1350,8 +1291,7 @@ const [saveInvoicerrrr ,setSaveInvoicerrrr] = useState([])
   const isSmallScreen = useMediaQuery("(max-width:767px)");
   return (
     <>
-      {/* <NavBar /> */}
-      <NavBar darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+      <NavBar  darkMode={darkMode} toggleDarkMode={toggleDarkMode}  />
       <div className="px-2 costom-dark-mod">
         <div className="lg:grid grid-cols-12  ">
           <div className="col-span-10 ">
@@ -1767,7 +1707,7 @@ const [saveInvoicerrrr ,setSaveInvoicerrrr] = useState([])
                   My Invoice
                 </h6>
                 <p className="h-6 w-5 bg-[#1976d2] rounded-md text-[12px] font-semibold text-white flex items-center justify-center ">
-                  {saveInvoicerrrr.length}
+                  {saveInvoiceGetFirebase.length}
                 </p>
               </div>
               <div className="pr-2  relative text-sm">
@@ -1795,7 +1735,7 @@ const [saveInvoicerrrr ,setSaveInvoicerrrr] = useState([])
               }}
             />
             <div className={isSmallScreen ? "pb-4 pt-2 h-[40vh]  overflow-auto" : "pb-4 pt-2 h-[72vh]  overflow-auto"} style={{ scrollbarWidth: 'none', '-ms-overflow-style': 'none' }}>
-              {saveInvoicerrrr.map((item, index) => (
+              {saveInvoiceGetFirebase.map((item, index) => (
                 <div key={index} className="px-2 py-1 ">
                   <div onClick={()=>handalAllItemValue(item)} className="cursor-pointer flex px-2 justify-between py-2 border border-gray-500 bg-[#1976d2] hover:bg-blue-500 rounded-md text-white items-center">
                     <h4>{item.idNum}</h4>
@@ -1875,3 +1815,5 @@ const [saveInvoicerrrr ,setSaveInvoicerrrr] = useState([])
 };
 
 export default Home;
+
+
