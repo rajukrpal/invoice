@@ -25,8 +25,10 @@ import {
   getDocs,
 } from "firebase/firestore";
 import { db } from "../firebase/firebase";
+import Invoice from "../invoice/Invoice";
 
 const Home = ({ darkMode, toggleDarkMode }) => {
+  const [propspasData,setPropspasData] = useState(false)
   const fileInputRef = useRef(null);
   const [isImageSelected, setIsImageSelected] = useState(false);
   const [invoice, setInvoice] = useState("Invoice No: ");
@@ -69,9 +71,66 @@ const Home = ({ darkMode, toggleDarkMode }) => {
   // const [invoices, setInvoices] = useState([]);
   const [currentInvoice, setCurrentInvoice] = useState(rows);
   const [saveInvoice, setSaveInvoice] = useState([]);
+  // let pcId = localStorage.getItem('pcId');
+  // const filteredInvoices = saveInvoice.filter(item => item.pcId === pcId);
 
-  // Example handleSaveInvoice function
+  const [filteredInvoices, setFilteredInvoices] = useState([]);
+  const pcId = localStorage.getItem('pcId');
+
+
+  // const handleSaveInvoice = async () => {
+    
+  //   const newInvoice = {
+  //     idNum: idNumber, // Assuming idNumber is your custom identifier
+  //     invoice: invoice,
+  //     invoiceDate: formattedInvoiceDate,
+  //     dueDate: formattedDueDat,
+  //     invoiceFrom: invoiceFrom,
+  //     invoiceTo: invoiceTo,
+  //     termsAndConditions: termsAndConditions,
+  //     footNote: footNote,
+  //     image: image,
+  //     rows: rows,
+  //     itemValue: itemValue,
+  //     discounts: discounts,
+  //     shipping: shipping,
+  //   };
+
+  //   try {
+  //     // Add new invoice to Firestore
+  //     const docRef = await addDoc(collection(db, "invoices"), {
+  //       ...newInvoice,
+  //     });
+
+  //     // Log the document ID to console
+  //     // console.log("Invoice written with ID: ", docRef.id);
+
+  //     // Update local state with current invoice and ID
+  //     const invoiceWithId = {
+  //       ...newInvoice,
+  //       uid: docRef.id, // Store docRef.id as uid
+  //     };
+
+  //     setCurrentInvoice(invoiceWithId);
+
+  //     // Update list of saved invoices
+  //     setSaveInvoice((prevInvoices) => [...prevInvoices, invoiceWithId]);
+  //   } catch (error) {
+  //     console.error("Error adding invoice: ", error);
+  //   }
+  // };
+
+
+
   const handleSaveInvoice = async () => {
+    // Generate or retrieve pcId
+    let pcId = localStorage.getItem('pcId');
+    if (!pcId) {
+      pcId = generateUniqueId();
+      localStorage.setItem('pcId', pcId);
+    }
+  
+    // Prepare new invoice object
     const newInvoice = {
       idNum: idNumber, // Assuming idNumber is your custom identifier
       invoice: invoice,
@@ -86,31 +145,101 @@ const Home = ({ darkMode, toggleDarkMode }) => {
       itemValue: itemValue,
       discounts: discounts,
       shipping: shipping,
+      pcId: pcId, // Include pcId in newInvoice
     };
-
+  
     try {
       // Add new invoice to Firestore
       const docRef = await addDoc(collection(db, "invoices"), {
         ...newInvoice,
       });
-
+  
       // Log the document ID to console
       // console.log("Invoice written with ID: ", docRef.id);
-
+  
       // Update local state with current invoice and ID
       const invoiceWithId = {
         ...newInvoice,
         uid: docRef.id, // Store docRef.id as uid
       };
-
+  
       setCurrentInvoice(invoiceWithId);
-
+  
       // Update list of saved invoices
       setSaveInvoice((prevInvoices) => [...prevInvoices, invoiceWithId]);
     } catch (error) {
       console.error("Error adding invoice: ", error);
     }
   };
+  
+
+  //_____________________________________________________________________________________________________________
+  useEffect(() => {
+    const fetchInvoices = async () => {
+      if (pcId) {
+        try {
+          // Fetch invoices from Firebase that match the pcId
+          const querySnapshot = await getDocs(collection(db, 'invoices'));
+          const fetchedInvoices = [];
+          
+          querySnapshot.forEach(doc => {
+            const invoiceData = doc.data();
+            if (invoiceData.pcId === pcId) {
+              fetchedInvoices.push({ ...invoiceData, uid: doc.id });
+            }
+          });
+
+          // Update local state with matching invoices
+          setSaveInvoice(fetchedInvoices);
+
+          // Store matching invoices in localStorage
+          localStorage.setItem('saveInvoice', JSON.stringify(fetchedInvoices));
+        } catch (error) {
+          console.error('Error fetching invoices:', error);
+        }
+      }
+    };
+
+    fetchInvoices();
+  }, [pcId]);
+
+
+
+  useEffect(() => {
+    // Fetch data from localStorage when component mounts
+    const savedInvoices = JSON.parse(localStorage.getItem('saveInvoice')) || [];
+    setSaveInvoice(savedInvoices);
+  }, []);
+
+
+  useEffect(() => {
+    // Filter invoices when pcId or saveInvoice changes
+    if (pcId) {
+      const filtered = saveInvoice.filter(item => item.pcId === pcId);
+      setFilteredInvoices(filtered);
+    }
+  }, [pcId, saveInvoice]);
+
+
+
+  useEffect(() => {
+    // Store saveInvoice to localStorage whenever it changes
+    localStorage.setItem('saveInvoice', JSON.stringify(saveInvoice));
+  }, [saveInvoice]);
+
+  useEffect(() => {
+    let pcId = localStorage.getItem('pcId');
+    if (!pcId) {
+      pcId = generateUniqueId(); 
+      localStorage.setItem('pcId', pcId);
+    }
+    console.log('PC ID:', pcId);
+  }, []);
+  const generateUniqueId = () => {
+    return Math.random().toString(36).substr(2, 8); //  2.82 trillion
+  };
+
+  //_____________________________________________________________________________________________________________
 
   useEffect(() => {
     const fetchInvoices = async () => {
@@ -1231,12 +1360,12 @@ const Home = ({ darkMode, toggleDarkMode }) => {
     <>
       {/* <NavBar /> */}
       <NavBar darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
-      <div className=" px-2 costom-dark-mod">
+      <div className="px-2 costom-dark-mod">
         <div className="lg:grid grid-cols-12  ">
           <div className="col-span-10 ">
             <div className="lg:grid grid-cols-12 gap-2 px-2">
               <div className="col-span-4">
-                <div className="grid grid-cols-6  my-6">
+                <div className="grid grid-cols-6">
                   <div className="col-span-6 ">
                     <div className="p-2">
                       {isImageSelected && image ? (
@@ -1744,6 +1873,7 @@ const Home = ({ darkMode, toggleDarkMode }) => {
                   </div>
                 </div>
               ))}
+
             </div>
           </div>
         </div>

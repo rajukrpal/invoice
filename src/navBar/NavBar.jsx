@@ -145,7 +145,7 @@ const NavBar = ({ toggleDarkMode }) => {
             </li>
             <li>
               <Link
-                to={'invoices'}
+                to={'/invoices'}
                 onClick={() => {
                   toggleMenu();
                   toggleSidebar();
@@ -156,7 +156,7 @@ const NavBar = ({ toggleDarkMode }) => {
             </li>
             <li>
               <Link
-                to={'settings'}
+                to={'/settings'}
                 onClick={() => {
                   toggleMenu();
                   toggleSidebar();
@@ -175,10 +175,10 @@ const NavBar = ({ toggleDarkMode }) => {
               <Link to={'/'}>Home</Link>
             </li>
             <li>
-              <Link to={'invoices'}>Invoices</Link>
+              <Link to={'/invoices'}>Invoices</Link>
             </li>
             <li>
-              <Link to={'settings'}>Settings</Link>
+              <Link to={'/settings'}>Settings</Link>
             </li>
           </ul>
           <div>
