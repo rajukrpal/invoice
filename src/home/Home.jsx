@@ -67,15 +67,15 @@ const Home = ({ darkMode, toggleDarkMode }) => {
       amount: "0",
     },
   ]);
-
+const [saveInvoicerrrr ,setSaveInvoicerrrr] = useState([])
   // const [invoices, setInvoices] = useState([]);
   const [currentInvoice, setCurrentInvoice] = useState(rows);
   const [saveInvoice, setSaveInvoice] = useState([]);
-  // let pcId = localStorage.getItem('pcId');
-  // const filteredInvoices = saveInvoice.filter(item => item.pcId === pcId);
+  let pcId = localStorage.getItem('pcId');
+  const filteredInvoices = saveInvoice.filter(item => item.pcId === pcId);
 
-  const [filteredInvoices, setFilteredInvoices] = useState([]);
-  const pcId = localStorage.getItem('pcId');
+  // const [filteredInvoices, setFilteredInvoices] = useState([]);
+  // const pcId = localStorage.getItem('pcId');
 
 
   // const handleSaveInvoice = async () => {
@@ -166,7 +166,7 @@ const Home = ({ darkMode, toggleDarkMode }) => {
       setCurrentInvoice(invoiceWithId);
   
       // Update list of saved invoices
-      setSaveInvoice((prevInvoices) => [...prevInvoices, invoiceWithId]);
+      setSaveInvoicerrrr((prevInvoices) => [...prevInvoices, invoiceWithId]);
     } catch (error) {
       console.error("Error adding invoice: ", error);
     }
@@ -180,6 +180,7 @@ const Home = ({ darkMode, toggleDarkMode }) => {
         try {
           // Fetch invoices from Firebase that match the pcId
           const querySnapshot = await getDocs(collection(db, 'invoices'));
+          // console.log("testing",querySnapshot)
           const fetchedInvoices = [];
           
           querySnapshot.forEach(doc => {
@@ -190,7 +191,7 @@ const Home = ({ darkMode, toggleDarkMode }) => {
           });
 
           // Update local state with matching invoices
-          setSaveInvoice(fetchedInvoices);
+          setSaveInvoicerrrr(fetchedInvoices);
 
           // Store matching invoices in localStorage
           localStorage.setItem('saveInvoice', JSON.stringify(fetchedInvoices));
@@ -210,15 +211,6 @@ const Home = ({ darkMode, toggleDarkMode }) => {
     const savedInvoices = JSON.parse(localStorage.getItem('saveInvoice')) || [];
     setSaveInvoice(savedInvoices);
   }, []);
-
-
-  useEffect(() => {
-    // Filter invoices when pcId or saveInvoice changes
-    if (pcId) {
-      const filtered = saveInvoice.filter(item => item.pcId === pcId);
-      setFilteredInvoices(filtered);
-    }
-  }, [pcId, saveInvoice]);
 
 
 
@@ -1775,7 +1767,7 @@ const Home = ({ darkMode, toggleDarkMode }) => {
                   My Invoice
                 </h6>
                 <p className="h-6 w-5 bg-[#1976d2] rounded-md text-[12px] font-semibold text-white flex items-center justify-center ">
-                  {saveInvoice.length}
+                  {saveInvoicerrrr.length}
                 </p>
               </div>
               <div className="pr-2  relative text-sm">
@@ -1803,7 +1795,7 @@ const Home = ({ darkMode, toggleDarkMode }) => {
               }}
             />
             <div className={isSmallScreen ? "pb-4 pt-2 h-[40vh]  overflow-auto" : "pb-4 pt-2 h-[72vh]  overflow-auto"} style={{ scrollbarWidth: 'none', '-ms-overflow-style': 'none' }}>
-              {saveInvoice.map((item, index) => (
+              {saveInvoicerrrr.map((item, index) => (
                 <div key={index} className="px-2 py-1 ">
                   <div onClick={()=>handalAllItemValue(item)} className="cursor-pointer flex px-2 justify-between py-2 border border-gray-500 bg-[#1976d2] hover:bg-blue-500 rounded-md text-white items-center">
                     <h4>{item.idNum}</h4>
