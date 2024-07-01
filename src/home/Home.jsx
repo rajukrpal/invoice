@@ -23,39 +23,62 @@ import {
   deleteDoc,
   doc,
   getDocs,
+  setDoc,
+  updateDoc,
 } from "firebase/firestore";
 import { db } from "../firebase/firebase";
+import { useLocation } from "react-router-dom";
+
 
 const Home = ({ darkMode, toggleDarkMode }) => {
+  const location = useLocation()
+  const {
+    invoice: initialInvoice,
+    idNum: initialIdNumber,
+    invoiceFrom:initialInvoiceFrom,
+    invoiceTo : initialInvoiceTo, 
+    termsAndConditions: initialTermsAndConditions,
+    image:initialImage,
+    footNote:initialFootNote,
+    itemValue: initialItemValue,
+    discounts:initialDiscounts,
+    shipping:initialShipping,
+    rows:initialRows,         
+    dueDate:initialDueDate,
+    invoiceDate:initialInvoiceDate,
+  }  = location.state || {};
   const fileInputRef = useRef(null);
-  const [isImageSelected, setIsImageSelected] = useState(false);
-  const [invoice, setInvoice] = useState("Invoice No: ");
+  const [isImageSelected, setIsImageSelected] = useState(true);
+  const [invoice, setInvoice] = useState( initialInvoice || "Invoice No: ");
   const [idNumber, setIdNumber] = useState(
-    Math.floor(100000 + Math.random() * 900000)
+    initialIdNumber ||  Math.floor(100000 + Math.random() * 900000)
   );
-  const [invoiceDate, setInvoiceDate] = useState(new Date());
+  const [invoiceDate, setInvoiceDate] = useState(
+    initialInvoiceDate ? new Date(initialInvoiceDate.split('-').reverse().join('-')) : new Date()
+  );  
+  
   const formattedInvoiceDate = `${invoiceDate
     .getDate()
     .toString()
     .padStart(2, "0")}-${(invoiceDate.getMonth() + 1)
     .toString()
     .padStart(2, "0")}-${invoiceDate.getFullYear()}`;
-  const [dueDat, setDueDat] = useState(null);
+  const [dueDat, setDueDat] = useState(initialDueDate ? new Date(initialDueDate.split('-').reverse().join('-')) : null);
       const formattedDueDat = dueDat instanceof Date
   ? `${dueDat.getDate().toString().padStart(2, '0')}-${(dueDat.getMonth() + 1).toString().padStart(2, '0')}-${dueDat.getFullYear()}`
   : '';
 
 
-  const [invoiceFrom, setInvoicefrom] = useState("");
-  const [invoiceTo, setInvoiceTo] = useState("");
-  const [itemValue, setItemValue] = useState(0);
-  const [discounts, setDiscounts] = useState(0);
-  const [shipping, setShipping] = useState(0);
-  const [termsAndConditions, setTermsAndConditions] = useState("");
-  const [footNote, setFootNote] = useState("");
-  const [image, setImage] = useState(null);
-  const [rows, setRows] = useState([
-    {
+  const [invoiceFrom, setInvoicefrom] = useState( initialInvoiceFrom || "");
+  const [invoiceTo, setInvoiceTo] = useState( initialInvoiceTo || "");
+  const [itemValue, setItemValue] = useState(initialItemValue || 0);
+  const [discounts, setDiscounts] = useState(initialDiscounts || 0);
+  const [shipping, setShipping] = useState(initialShipping || 0);
+  const [termsAndConditions, setTermsAndConditions] = useState( initialTermsAndConditions|| "");
+  const [footNote, setFootNote] = useState(initialFootNote || "");
+  const [image, setImage] = useState(initialImage || null);
+  const [rows, setRows] = useState( initialRows || [
+     {
       id: 1,
       item: "",
       quantity: "0",
@@ -68,8 +91,10 @@ const [saveInvoiceGetFirebase ,setSaveInvoiceGetFirebase] = useState([])
   const [currentInvoice, setCurrentInvoice] = useState(rows);
   const [saveInvoice, setSaveInvoice] = useState([]);
   let pcId = localStorage.getItem('pcId');
-  
+
   const handleSaveInvoice = async () => {
+    let { uid: initialUid } = location.state || {};
+  
     // Generate or retrieve pcId
     let pcId = localStorage.getItem('pcId');
     if (!pcId) {
@@ -79,7 +104,7 @@ const [saveInvoiceGetFirebase ,setSaveInvoiceGetFirebase] = useState([])
   
     // Prepare new invoice object
     const newInvoice = {
-      idNum: idNumber, 
+      idNum: idNumber,
       invoice: invoice,
       invoiceDate: formattedInvoiceDate,
       dueDate: formattedDueDat,
@@ -96,26 +121,43 @@ const [saveInvoiceGetFirebase ,setSaveInvoiceGetFirebase] = useState([])
     };
   
     try {
-      // Add new invoice to Firestore
-      const docRef = await addDoc(collection(db, "invoices"), {
-        ...newInvoice,
-      });
+      if (initialUid) {
+        // Update existing invoice in Firestore
+        const invoiceRef = doc(db, "invoices", initialUid);
+        await updateDoc(invoiceRef, newInvoice);
   
-      // Update local state with current invoice and ID
-      const invoiceWithId = {
-        ...newInvoice,
-        uid: docRef.id, // Store docRef.id as uid
-      };
+        // Update local state with current invoice
+        setCurrentInvoice(newInvoice);
   
-      setCurrentInvoice(invoiceWithId);
+        // Update list of saved invoices (if necessary)
+        setSaveInvoiceGetFirebase((prevInvoices) => {
+          const updatedInvoices = prevInvoices.map((inv) =>
+            inv.uid === initialUid ? newInvoice : inv
+          );
+          return updatedInvoices;
+        });
+      } else {
+        // Add new invoice to Firestore
+        const docRef = await addDoc(collection(db, "invoices"), {
+          ...newInvoice,
+        });
   
-      // Update list of saved invoices
-      setSaveInvoiceGetFirebase((prevInvoices) => [...prevInvoices, invoiceWithId]);
+        // Update local state with current invoice and ID
+        const invoiceWithId = {
+          ...newInvoice,
+          uid: docRef.id, // Store docRef.id as uid
+        };
+  
+        setCurrentInvoice(invoiceWithId);
+  
+        // Update list of saved invoices
+        setSaveInvoiceGetFirebase((prevInvoices) => [...prevInvoices, invoiceWithId]);
+      }
     } catch (error) {
-      console.error("Error adding invoice: ", error);
+      console.error("Error adding/updating invoice: ", error);
     }
   };
-  
+
 
   useEffect(() => {
     const fetchInvoices = async () => {
@@ -145,6 +187,7 @@ const [saveInvoiceGetFirebase ,setSaveInvoiceGetFirebase] = useState([])
 
     fetchInvoices();
   }, [pcId]);
+  
 
 
 
@@ -360,7 +403,7 @@ const [saveInvoiceGetFirebase ,setSaveInvoiceGetFirebase] = useState([])
   const handleRemoveImage = () => {
     // setSelectedImage(null);
     setImage(null);
-    setIsImageSelected(false);
+    setIsImageSelected(true);
     // Clear file input (optional, if needed)
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
@@ -1406,8 +1449,6 @@ const [saveInvoiceGetFirebase ,setSaveInvoiceGetFirebase] = useState([])
                       Due Date:
                     </label>
                     <div className="relative w-full ">
-                    
-
                       <DatePicker
                         id="dueDat"
                         selected={dueDat}
@@ -1629,7 +1670,7 @@ const [saveInvoiceGetFirebase ,setSaveInvoiceGetFirebase] = useState([])
                   </div>
                   <div className="col-span-9">
                     <input
-                      value={shipping}
+                      value={ shipping}
                       onChange={handleshippingCharg}
                       className="w-full p-1 px-2 rounded border outline-none costom-dark-mod-input"
                       type="number"

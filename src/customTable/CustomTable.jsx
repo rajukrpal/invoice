@@ -1,19 +1,67 @@
-/* eslint-disable react/prop-types */
-import React, { useState, useEffect } from "react";
-import NavBar from "../navBar/NavBar";
-import { collection, deleteDoc, doc, getDocs } from "firebase/firestore";
-import { db } from "../firebase/firebase";
-import { Button } from "@mui/material";
-import { BsDownload } from "react-icons/bs";
-import { FaRegFilePdf } from "react-icons/fa";
-import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+// CustomTable.jsx
+
+// import React, { useMemo } from 'react';
+// import { AgGridReact } from 'ag-grid-react';
+// import 'ag-grid-community/styles/ag-grid.css';
+// import 'ag-grid-community/styles/ag-theme-alpine.css';
+// import NavBar from '../navBar/NavBar';
+
+// const CustomTable = ({ rowData, columnDefs, defaultColDef }) => {
+//   // Memoize the defaultColDef to prevent unnecessary re-renders
+//   const memoizedDefaultColDef = useMemo(() => defaultColDef, [defaultColDef]);
+
+//   return (
+//     <>
+//     <NavBar />
+//     <div className='bg-black text-white'>raju</div>
+
+//     <div className="ag-theme-alpine" style={{ height: '100%', width: '100%' }}>
+//       <AgGridReact
+//         rowData={rowData}
+//         columnDefs={columnDefs}
+//         defaultColDef={memoizedDefaultColDef}
+//         rowSelection="multiple"
+//         suppressRowClickSelection={true}
+//         pagination={true}
+//         paginationPageSize={10}
+//         paginationPageSizeSelector={[10, 25, 50]}
+//       />
+//     </div>
+//     </>
+//   );
+// };
+
+// export default CustomTable;
+
+
+import React, { useEffect, useMemo, useState } from 'react';
+import { AgGridReact } from 'ag-grid-react';
+import 'ag-grid-community/styles/ag-grid.css';
+import 'ag-grid-community/styles/ag-theme-alpine.css';
+import NavBar from '../navBar/NavBar';
+import { useNavigate } from 'react-router-dom';
+import { collection, deleteDoc, doc, getDocs } from 'firebase/firestore';
+import { db } from '../firebase/firebase';
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
-import { AiFillPrinter } from "react-icons/ai";
-import { useNavigate } from "react-router-dom";
 
-const Invoice = ({ darkMode, toggleDarkMode }) => {
-  const navigate = useNavigate();
+const MyCellComponent = p =>{
+    return(
+        <>
+        <div className='space-x-2'>
+        <button className='bg-gray-400 p-1' onClick={()=>window.alert("open")}> + open </button>
+        {p.value}
+        <button className='bg-gray-400 p-1' onClick={()=>window.alert("close")}> + close </button>
+        {p.value}
+        <button className='bg-gray-400 p-1' onClick={()=>window.alert("edit")}> + edit </button>
+        {p.value}
+        </div>
+        </>
+    )
+}
+
+const CustomTable = () => {
+    const navigate = useNavigate();
   const [saveInvoiceGetFirebase, setSaveInvoiceGetFirebase] = useState([]);
 
   let pcId = localStorage.getItem("pcId");
@@ -76,6 +124,7 @@ const Invoice = ({ darkMode, toggleDarkMode }) => {
       uid:item.uid,
     }})
   }
+
 
   const handleDownloadPdf = (item) => {
     // Create a container div for the bill content
@@ -535,101 +584,63 @@ const Invoice = ({ darkMode, toggleDarkMode }) => {
     }
   };
 
+
+
+
+
+
+
+
+
+const [rowData,setRowData] = useState([
+    {InvoiceNo:saveInvoiceGetFirebase.map((item)=>(
+        <>
+        {item.idNum}
+        {/* <td>{console.log("item",item)}</td> */}
+        </>
+    )),InvoiceDate:"01-07-2024" ,DueDate:"01-07-2024",Currency:"INR" ,InvoiceTo:"InvoiceTo",Action:""},
+   
+])
+
+const [colDefs,setColDefs] = useState([
+    {field:"InvoiceNo",
+        // headerName:"campany"
+    },
+    {field:"InvoiceDate"},
+    {field:"DueDate"},
+    {field:"Currency"},
+    {field:"InvoiceTo"},
+   
+    {field:"Action",
+        cellRenderer:MyCellComponent
+    },
+
+])
   return (
     <>
-      <NavBar darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
-      <div className="px-5 costom-dark-mod h-[100vh] overflow-auto">
-        <table
-          id="invoiceTable"
-          className=" min-w-full bg-white border border-gray-300 costom-dark-mod "
-        >
-          <thead>
-            <tr>
-              <th className="px-4 py-2 border-b-2 text-left">Invoice No</th>
-              <th className="px-4 py-2 border-b-2 text-left">Invoice Date</th>
-              <th className="px-4 py-2 border-b-2 text-left">Due Date</th>
-              <th className="px-4 py-2 border-b-2 text-left">Currency</th>
-              <th className="px-4 py-2 border-b-2 text-left">Invoice To</th>
-              <th className="px-4 py-2 border-b-2 text-left">Action</th>
-            </tr>
-            {/* <tr>
-                    <th className="px-4 py-2 border-b-2 text-left"><input type="text" placeholder="Invoice No" className="w-24  rounded px-2 py-1"/></th>
-                    <th className="px-4 py-2 border-b-2 text-left"><input type="text" placeholder="Invoice Date" className="w-52  rounded px-2 py-1"/></th>
-                    <th className="px-4 py-2 border-b-2 text-left"><input type="text" placeholder="Due Date" className="w-52  rounded px-2 py-1"/></th>
-                    <th className="px-4 py-2 border-b-2 text-left"><input type="text" placeholder="Currency" className="w-24  rounded px-2 py-1"/></th>
-                    <th className="px-4 py-2 border-b-2 text-left"><input type="text" placeholder="Invoice To" className="w-full  rounded px-2 py-1"/></th>
-                    <th className="px-4 py-2 border-b-2 text-left"></th>
-                </tr> */}
-          </thead>
-          <tbody>
-            {saveInvoiceGetFirebase.map((invoice, index) => (
-              <tr key={index} className="hover:bg-gray-200 hover:text-black">
-                <td className="px-4 py-2 border-b">{invoice.idNum}</td>
-                <td className="px-4 py-2 border-b">{invoice.invoiceDate}</td>
-                <td className="px-4 py-2 border-b">{invoice.dueDate}</td>
-                <td className="px-4 py-2 border-b">INR</td>
-                <td className="px-4 py-2 border-b">{invoice.invoiceTo}</td>
-                <td className="px-4 py-2 border-b">
-                  <Button
-                    sx={{ marginRight: 1 }}
-                    size="small"
-                    variant="outlined"
-                    onClick={() => {
-                      handleOpenAndEdit(invoice);
-                    }}
-                  >
-                    Open
-                  </Button>
-                  <Button
-                    sx={{ marginRight: 1, padding: 1 }}
-                    size="small"
-                    variant="outlined"
-                    onClick={() => {
-                      handleDownloadPdf(invoice);
-                    }}
-                  >
-                    <BsDownload />
-                  </Button>
-                  <Button
-                    sx={{ marginRight: 1, padding: 1 }}
-                    size="small"
-                    variant="outlined"
-                    onClick={() => {
-                      handleOpenPdf(invoice);
-                    }}
-                  >
-                    <FaRegFilePdf />
-                  </Button>
-                  <Button
-                    sx={{ marginRight: 1, padding: 1 }}
-                    size="small"
-                    variant="outlined"
-                    onClick={() => {
-                      handlePrintPdf(invoice);
-                    }}
-                  >
-                    <AiFillPrinter />
-                  </Button>
-                  <Button
-                    sx={{ marginRight: 1 }}
-                    size="small"
-                    variant="outlined"
+    <NavBar />
+    {/* <div className='bg-black text-white'>raju</div> */}
 
-                    onClick={() => {
-                      handleDeleteInvoice(invoice.uid);
-                    }}
-                  >
-                    <DeleteForeverIcon />
-                  </Button>
-                 
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+    <div className="ag-theme-alpine" style={{ height: '500px'}}>
+      <AgGridReact
+        rowData={rowData}
+        columnDefs={colDefs}
+        // defaultColDef={memoizedDefaultColDef}
+        rowSelection="multiple"
+        suppressRowClickSelection={true}
+        pagination={true}
+        paginationPageSize={10}
+        paginationPageSizeSelector={[10, 25, 50]}
+      />
+    </div>
     </>
   );
 };
 
-export default Invoice;
+export default CustomTable;
+
+
+
+
+
+
