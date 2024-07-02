@@ -578,7 +578,7 @@ const Invoice = ({ darkMode, toggleDarkMode }) => {
                       handleOpenAndEdit(invoice);
                     }}
                   >
-                    Open
+                    Edit
                   </Button>
                   <Button
                     sx={{ marginRight: 1, padding: 1 }}
