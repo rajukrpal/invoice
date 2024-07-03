@@ -1,4 +1,4 @@
-import * as React from "react";
+import { useRef, useState } from "react";
 import PropTypes from "prop-types";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
@@ -12,8 +12,8 @@ import { Link } from "react-router-dom";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
-import Typography from "@mui/material/Typography";
 import { Button, CardActionArea, CardActions } from "@mui/material";
+import DateComponent from "../dateComponent/DateComponent";
 
 const currencies = [
   { value: "USD", label: "USD" },
@@ -84,22 +84,36 @@ function a11yProps(index) {
 }
 
 const Setting = () => {
-  const fileInputRef = React.useRef(null);
-  const [value, setValue] = React.useState(0);
+  const fileInputRef = useRef(null);
+  const [value, setValue] = useState(0);
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
 
-  const [color, setColor] = React.useState("#000");
-  const [color2, setColor2] = React.useState("#FFFFFF");
-  const [taxationPercentageGst, setTaxationPercentageGst] = React.useState("");
+  const [color, setColor] = useState("#000");
+  const [color2, setColor2] = useState("#FFFFFF");
+  const [taxationPercentageGst, setTaxationPercentageGst] = useState("");
   const [taxationPercentageDescount, setTaxationPercentageDescount] =
-    React.useState("");
+    useState("");
   const [taxationPercentageShipping, setTaxationPercentageShipping] =
-    React.useState("");
-  const [showPicker, setShowPicker] = React.useState(false);
-  const [showPicker2, setShowPicker2] = React.useState(false);
-  const [selectedTemplate, setSelectedTemplate] = React.useState("Template 1"); // State to keep track of selected template
+    useState("");
+  const [showPicker, setShowPicker] = useState(false);
+  const [showPicker2, setShowPicker2] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState("Template 1"); // State to keep track of selected template
+  const [autoSetDueDate, setAutoSetDueDate] = useState(false);
+  const [numberOfDays, setNumberOfDays] = useState(0);
+  const [invoiceNo, setInvoiceNo] = useState("")
+
+  const handleCheckboxChange = (event) => {
+    setAutoSetDueDate(event.target.checked);
+    if (!event.target.checked) {
+      setNumberOfDays(0); // Reset number of days when checkbox is unchecked
+    }
+  };
+
+  const handleNumberOfDaysChange = (event) => {
+    setNumberOfDays(event.target.value);
+  };
 
   const handleTemplateSelect = (templateName) => {
     setSelectedTemplate(templateName); // Update the selected template state
@@ -135,16 +149,16 @@ const Setting = () => {
   };
 
   // 1111111111
-  const [isImageSelected, setIsImageSelected] = React.useState(true);
-  const [image, setImage] = React.useState(null);
+  const [isImageSelected, setIsImageSelected] = useState(true);
+  const [image, setImage] = useState(null);
 
-  const [currency, setCurrency] = React.useState("INR");
-  const [pageOrientation, setPageOrientation] = React.useState("portrait");
-  const [pageSize, setPageSize] = React.useState("A4");
-  const [taxation, setTaxation] = React.useState("GST");
-  const [isOpen, setIsOpen] = React.useState(false);
-  const [isOpenTex, setIsOpenTex] = React.useState(false);
-  const [checked, setChecked] = React.useState(false);
+  const [currency, setCurrency] = useState("INR");
+  const [pageOrientation, setPageOrientation] = useState("portrait");
+  const [pageSize, setPageSize] = useState("A4");
+  const [taxation, setTaxation] = useState("GST");
+  const [isOpen, setIsOpen] = useState(false);
+  const [isOpenTex, setIsOpenTex] = useState(false);
+  const [checked, setChecked] = useState(false);
 
   const handleChangeButton = () => {
     setChecked(!checked);
@@ -202,7 +216,7 @@ const Setting = () => {
     }
   };
 
-  const [selectedColor, setSelectedColor] = React.useState("#213F6B");
+  const [selectedColor, setSelectedColor] = useState("#213F6B");
 
   const handleColorChange = (color) => {
     setSelectedColor(color.hex); // Update state with selected color
@@ -241,335 +255,57 @@ const Setting = () => {
           </Box>
           <CustomTabPanel value={value} index={0}>
             <div className="md:h-[82vh]">
-            <div className="border border-gray-500 rounded pb-8">
-              <div className="md:grid grid-cols-12 px-4">
-                <div className="col-span-5 ">
-                  <div className="p-2">
-                    {isImageSelected && image ? (
-                      <div>
-                        <img className="w-20 h-20" src={image} alt="Selected" />
-                        <button
-                          onClick={handleRemoveImage}
-                          className="mt-2 bg-red-500 text-white px-2 py-1 rounded"
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="lg:w-60 lg:h-60 w-full p-2 border-2 border-dashed border-[#92b0b3] relative flex flex-col justify-center items-center">
-                        <div className="flex flex-col items-center">
-                          <GrDownload className="text-blue-500" />
-                          <h2 className="py-4 text-center text-2xl font-medium text-[#64a591]">
-                            Or Drag It Here.
-                          </h2>
-                        </div>
-                        <input
-                          className="border border-blue-500 absolute bottom-0 left-0 w-full h-full opacity-0 cursor-pointer "
-                          type="file"
-                          onChange={handleImageChange}
-                        />
-                      </div>
-                    )}
-                  </div>
-                </div>
-                <div className="col-span-7 ">
-                  <div className="md:grid grid-cols-12 py-3">
-                    <div className="px-2 col-span-6">
-                      <div className="relative">
-                        <div className="flex items-center border">
-                          <span className="input-group-text">Currency</span>
-                          <input
-                            type="text"
-                            className="form-input pl-10 pr-4 py-2  w-full costom-dark-mod-input outline-none"
-                            aria-label="Sizing example input"
-                            aria-describedby="inputGroup-sizing-default"
-                            value={currency}
-                            readOnly
-                            onClick={toggleMenu}
+              <div className="border border-gray-500 rounded pb-8">
+                <div className="md:grid grid-cols-12 px-4">
+                  <div className="col-span-5 ">
+                    <div className="p-2">
+                      {isImageSelected && image ? (
+                        <div>
+                          <img
+                            className="w-20 h-20"
+                            src={image}
+                            alt="Selected"
                           />
-                          <div className="absolute right-3 top-1/2 transform -translate-y-1/2 ">
-                            <BsFillCaretDownFill
-                              className="cursor-pointer text-gray-500"
-                              onClick={toggleMenu}
-                            />
-                          </div>
+                          <button
+                            onClick={handleRemoveImage}
+                            className="mt-2 bg-red-500 text-white px-2 py-1 rounded"
+                          >
+                            Remove
+                          </button>
                         </div>
-                        {isOpen && (
-                          <div className="absolute  w-full rounded-md bg-white ">
-                            <ul className="py-1">
-                              {currencies.map((option) => (
-                                <li
-                                  key={option.value}
-                                  className="px-3 py-2 cursor-pointer hover:bg-gray-100 hover:text-black costom-dark-mod-input "
-                                  onClick={() =>
-                                    handleSelectCurrency(option.value)
-                                  }
-                                >
-                                  {option.label}
-                                </li>
-                              ))}
-                            </ul>
+                      ) : (
+                        <div className="lg:w-60 lg:h-60 w-full p-2 border-2 border-dashed border-[#92b0b3] relative flex flex-col justify-center items-center">
+                          <div className="flex flex-col items-center">
+                            <GrDownload className="text-blue-500" />
+                            <h2 className="py-4 text-center text-2xl font-medium text-[#64a591]">
+                              Or Drag It Here.
+                            </h2>
                           </div>
-                        )}
-                      </div>
-                    </div>
-                    <div className="px-2 col-span-6">
-                      <div className="relative">
-                        <div className="flex items-center border">
-                          <span className="input-group-text">Taxation</span>
                           <input
-                            type="text"
-                            className="form-input pl-10 pr-4 py-2  w-full outline-none costom-dark-mod-input"
-                            aria-label="Sizing example input"
-                            aria-describedby="inputGroup-sizing-default"
-                            value={taxation}
-                            readOnly
-                            onClick={toggleMenuTex}
+                            className="border border-blue-500 absolute bottom-0 left-0 w-full h-full opacity-0 cursor-pointer "
+                            type="file"
+                            onChange={handleImageChange}
                           />
-                          <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                            <BsFillCaretDownFill
-                              className="cursor-pointer text-gray-500"
-                              onClick={toggleMenuTex}
-                            />
-                          </div>
                         </div>
-                        {isOpenTex && (
-                          <div className="absolute mt-1 w-full rounded-md bg-white shadow-lg costom-dark-mod-input">
-                            <ul className="py-1">
-                              {Taxations.map((option) => (
-                                <li
-                                  key={option.value}
-                                  className="px-3 py-2 cursor-pointer hover:bg-gray-100 hover:text-black"
-                                  onClick={() => handleSelectTex(option.value)}
-                                >
-                                  {option.label}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                      </div>
+                      )}
                     </div>
                   </div>
-                  <div>
-                    <div className="py-3">
-                      <div className="px-2 grid grid-cols-12 gap-4">
-                        <div className="col-span-4">
-                          <div className="flex flex-wrap w-full ">
-                            <label
-                              htmlFor="taxationPer"
-                              className="input-group-text py-2 pr-2 w-1/5"
-                            >
-                              GST
-                            </label>
-                            <input
-                              type="number"
-                              value={taxationPercentageGst}
-                              onChange={handleInputChangeGst}
-                              className="form-input flex-1 costom-dark-mod-input"
-                              placeholder="Taxation Percentage"
-                              id="taxationPer"
-                            />
-                          </div>
-                        </div>
-                        <div className="col-span-4">
-                          <div className="flex flex-wrap w-full ">
-                            <label
-                              htmlFor="discounts"
-                              className="input-group-text py-2 pr-2 w-1/5"
-                            >
-                              Discounts
-                            </label>
-                            <input
-                              type="number"
-                              value={taxationPercentageDescount}
-                              onChange={handleInputChangeDescount}
-                              className="form-input flex-1 px-3 costom-dark-mod-input"
-                              placeholder="Discounts"
-                              id="discounts"
-                            />
-                          </div>
-                        </div>
-                        <div className="col-span-4">
-                          <div className="flex flex-wrap w-full ">
-                            <label
-                              htmlFor="shipping"
-                              className="input-group-text py-2 pr-2 w-1/5"
-                            >
-                              Shipping
-                            </label>
-                            <input
-                              type="number"
-                              value={taxationPercentageShipping}
-                              onChange={handleInputChangeShipping}
-                              className="form-input w-full flex-1 px-3 costom-dark-mod-input"
-                              placeholder="Shipping"
-                              id="shipping"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-12 px-2 py-4">
-                        <div className="col-span-12">
-                          <div className="flex flex-wrap w-full ">
-                            <label
-                              htmlFor="invoiceNo"
-                              className="input-group-text py-2 pr-2 w-1/5"
-                            >
-                              Invoice No
-                            </label>
-                            <input
-                              type="text"
-                              className="form-input flex-1 px-3 costom-dark-mod-input"
-                              placeholder="Invoice No:"
-                              id="invoiceNo"
-                              value=""
-                            />
-                          </div>
-                          <div>
-                            <ul className="flex flex-wrap gap-2 py-1">
-                              <li>
-                                <b>Exampal:</b>
-                              </li>
-                              <li>Invoice No:</li>
-                              <li>Bill No:</li>
-                              <li>Proforma Invoice No:</li>
-                              <li>Receipt No:</li>
-                              <li>Purchase Order:</li>
-                            </ul>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="mb-3 px-2">
-                        <div className="flex flex-col md:grid grid-cols-12 items-center">
-                          <div className="flex items-center col-span-4 mb-2 md:mb-0">
-                            <input
-                              type="checkbox"
-                              id="AutoSetDueDate"
-                              className="form-checkbox h-5 w-5 text-indigo-600"
-                            />
-                            <label htmlFor="AutoSetDueDate" className="ml-2">
-                              Auto set Due Date
-                            </label>
-                          </div>
-
-                          <div className="col-span-8">
-                            <div className="grid grid-cols-12">
-                              <span className="px-2 py-1 bg-gray-200 text-gray-700 costom-dark-mod-input col-span-3">
-                                Today Date +
-                              </span>
-                              <input
-                                type="number"
-                                className="form-input flex-1 px-2 py-1 ml-2 md:ml-0 bg-slate-200 costom-dark-mod-input col-span-6"
-                                min="0"
-                                value="0"
-                                disabled
-                              />
-                              <span className="px-2 py-1 bg-gray-200 text-gray-700 ml-2 md:ml-0 costom-dark-mod-input col-span-3">
-                                No of Day(s)
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="mt-1">
-                          <b>Example:</b>{" "}
-                          <span>2024-07-02 + 7 Days = 2024-07-09</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className=" md:grid grid-cols-12 py-5 gap-4 px-4">
-                <div className="col-span-4 ">
-                  <div className="">
-                    <p>Invoice from</p>
-                    <div>
-                      <textarea
-                        // value={invoiceFrom}
-                        // onChange={(e) => setInvoicefrom(e.target.value)}
-                        placeholder="Who is this invoice from?"
-                        className="w-full border outline-none h-24 p-2 rounded-lg costom-dark-mod-input"
-                        name=""
-                        id=""
-                      ></textarea>
-                    </div>
-                  </div>
-                </div>
-                <div className="col-span-4 ">
-                  <div className="">
-                    <p>Terms & Conditions</p>
-                    <div>
-                      <textarea
-                        // value={invoiceFrom}
-                        // onChange={(e) => setInvoicefrom(e.target.value)}
-                        placeholder="Terms and conditions - late fees, payment methods, delivery schedule"
-                        className="w-full border outline-none h-24 p-2 rounded-lg costom-dark-mod-input"
-                        name=""
-                        id=""
-                      ></textarea>
-                    </div>
-                  </div>
-                </div>
-                <div className="col-span-4 ">
-                  <div className="">
-                    <p>Foot Note</p>
-                    <div>
-                      <textarea
-                        // value={invoiceFrom}
-                        // onChange={(e) => setInvoicefrom(e.target.value)}
-                        placeholder="Thank you for your business"
-                        className="w-full border outline-none h-24 p-2 rounded-lg costom-dark-mod-input"
-                        name=""
-                        id=""
-                      ></textarea>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            </div>
-          </CustomTabPanel>
-          <CustomTabPanel value={value} index={1}>
-            <div className="md:h-[83vh]">
-            <div className="border border-gray-500 rounded pb-8 pt-4 ">
-              <div className="md:grid grid-cols-12 px-4">
-                <div className="col-span-3">
-                  <div>
-                    <p className="py-2">Background Color</p>
-                    <SketchPicker
-                      color={selectedColor}
-                      onChange={handleColorChange}
-                    />
-                  </div>
-                  <div className="mt-4">
-                    <p>Selected Color:</p>
-                    <div
-                      className="w-12 h-12 rounded-md border border-gray-300"
-                      style={{ backgroundColor: selectedColor }}
-                    ></div>
-                  </div>
-                </div>
-                <div className="col-span-9">
-                  <div className="pb-5">
-                    <div className="md:grid grid-cols-12 gap-4">
-                      <div className="col-span-6">
-                        <div className="relative ">
+                  <div className="col-span-7 ">
+                    <div className="md:grid grid-cols-12 py-3">
+                      <div className="px-2 col-span-6">
+                        <div className="relative">
                           <div className="flex items-center border">
-                            <span className="input-group-text w-40">
-                              Page Orientation
-                            </span>
+                            <span className="input-group-text">Currency</span>
                             <input
                               type="text"
-                              className="form-input pl-10 pr-4 py-2  w-full costom-dark-mod-input"
+                              className="form-input pl-10 pr-4 py-2  w-full costom-dark-mod-input outline-none"
                               aria-label="Sizing example input"
                               aria-describedby="inputGroup-sizing-default"
-                              value={pageOrientation}
+                              value={currency}
                               readOnly
                               onClick={toggleMenu}
                             />
-                            <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                            <div className="absolute right-3 top-1/2 transform -translate-y-1/2 ">
                               <BsFillCaretDownFill
                                 className="cursor-pointer text-gray-500"
                                 onClick={toggleMenu}
@@ -577,14 +313,14 @@ const Setting = () => {
                             </div>
                           </div>
                           {isOpen && (
-                            <div className="absolute mt-1 w-full rounded-md bg-white shadow-lg z-10 costom-dark-mod-input">
+                            <div className="absolute  w-full rounded-md bg-white ">
                               <ul className="py-1">
-                                {pageOrientationVal.map((option) => (
+                                {currencies.map((option) => (
                                   <li
                                     key={option.value}
-                                    className="px-3 py-2 cursor-pointer hover:bg-gray-100 hover:text-black"
+                                    className="px-3 py-2 cursor-pointer hover:bg-gray-100 hover:text-black costom-dark-mod-input "
                                     onClick={() =>
-                                      handleSelectpageOrientation(option.value)
+                                      handleSelectCurrency(option.value)
                                     }
                                   >
                                     {option.label}
@@ -595,18 +331,16 @@ const Setting = () => {
                           )}
                         </div>
                       </div>
-                      <div className="col-span-6">
-                        <div className="relative ">
+                      <div className="px-2 col-span-6">
+                        <div className="relative">
                           <div className="flex items-center border">
-                            <span className="input-group-text w-40">
-                              Page Size
-                            </span>
+                            <span className="input-group-text">Taxation</span>
                             <input
                               type="text"
-                              className="form-input pl-10 pr-4 py-2  w-full costom-dark-mod-input"
+                              className="form-input pl-10 pr-4 py-2  w-full outline-none costom-dark-mod-input"
                               aria-label="Sizing example input"
                               aria-describedby="inputGroup-sizing-default"
-                              value={pageSize}
+                              value={taxation}
                               readOnly
                               onClick={toggleMenuTex}
                             />
@@ -618,14 +352,14 @@ const Setting = () => {
                             </div>
                           </div>
                           {isOpenTex && (
-                            <div className="absolute mt-1 w-full rounded-md bg-white shadow-lg z-10 costom-dark-mod-input">
+                            <div className="absolute mt-1 w-full rounded-md bg-white shadow-lg costom-dark-mod-input">
                               <ul className="py-1">
-                                {pageSizeVal.map((option) => (
+                                {Taxations.map((option) => (
                                   <li
                                     key={option.value}
                                     className="px-3 py-2 cursor-pointer hover:bg-gray-100 hover:text-black"
                                     onClick={() =>
-                                      handleSelectpageSize(option.value)
+                                      handleSelectTex(option.value)
                                     }
                                   >
                                     {option.label}
@@ -637,221 +371,528 @@ const Setting = () => {
                         </div>
                       </div>
                     </div>
-                  </div>
-                  <div className="pb-5">
-                    <div className="border border-gray-700 rounded-md ">
-                      <div className="px-">
-                        <div className="font-semibold text-2xl py-1 px-2 costom-dark-mod-input">
-                          Watermark
-                        </div>
-                        <div className="w-full bg-black h-[1px]"></div>
-                        <hr />
-                        <div className="px-2 py-2">
-                          <div className="mb-3 flex w-full">
-                            <span
-                              className="flex-shrink-0 px-3 py-2 bg-gray-200 text-gray-700 costom-dark-mod"
-                              id="inputGroup-sizing-default"
-                            >
-                              Default
-                            </span>
-                            <input
-                              type="text"
-                              className="flex-grow px-3 w-full py-2 rounded-r-md border border-gray-300 focus:outline-none focus:border-blue-500 costom-dark-mod-input"
-                              aria-label="Sizing example input"
-                              aria-describedby="inputGroup-sizing-default"
-                            />
+                    <div>
+                      <div className="py-3">
+                        <div className="px-2 grid grid-cols-12 gap-4">
+                          <div className="col-span-4">
+                            <div className="flex flex-wrap w-full ">
+                              <label
+                                htmlFor="taxationPer"
+                                className="input-group-text py-2 pr-2 w-1/5"
+                              >
+                                GST
+                              </label>
+                              <input
+                                type="number"
+                                value={taxationPercentageGst}
+                                onChange={handleInputChangeGst}
+                                className="form-input flex-1 costom-dark-mod-input"
+                                placeholder="Taxation Percentage"
+                                id="taxationPer"
+                              />
+                            </div>
+                          </div>
+                          <div className="col-span-4">
+                            <div className="flex flex-wrap w-full ">
+                              <label
+                                htmlFor="discounts"
+                                className="input-group-text py-2 pr-2 w-1/5"
+                              >
+                                Discounts
+                              </label>
+                              <input
+                                type="number"
+                                value={taxationPercentageDescount}
+                                onChange={handleInputChangeDescount}
+                                className="form-input flex-1 px-3 costom-dark-mod-input"
+                                placeholder="Discounts"
+                                id="discounts"
+                              />
+                            </div>
+                          </div>
+                          <div className="col-span-4">
+                            <div className="flex flex-wrap w-full ">
+                              <label
+                                htmlFor="shipping"
+                                className="input-group-text py-2 pr-2 w-1/5"
+                              >
+                                Shipping
+                              </label>
+                              <input
+                                type="number"
+                                value={taxationPercentageShipping}
+                                onChange={handleInputChangeShipping}
+                                className="form-input w-full flex-1 px-3 costom-dark-mod-input"
+                                placeholder="Shipping"
+                                id="shipping"
+                              />
+                            </div>
                           </div>
                         </div>
-                        {/*  */}
-                        <div className="px-2 py-2">
-                          <div className="mb-3 sm:flex w-full items-center">
-                            <span className="flex-shrink-0 px-3 py-2 bg-gray-200 text-gray-700 rounded-l-md costom-dark-mod">
-                              Opacity
-                            </span>
-
-                            <input
-                              type="text"
-                              className="flex-grow px-3 py-2 border border-gray-300 focus:outline-none focus:border-blue-500 costom-dark-mod-input costom-dark-mod-input"
-                              aria-label="Sizing example input"
-                              aria-describedby="inputGroup-sizing-default"
-                            />
-                            <div className=" border p-2 flex items-center">
+                        <div className="grid grid-cols-12 px-2 py-4">
+                          <div className="col-span-12">
+                            <div className="flex flex-wrap w-full ">
+                              <label
+                                htmlFor="invoiceNo"
+                                className="input-group-text py-2 pr-2 w-1/5"
+                              >
+                                Invoice No
+                              </label>
+                              <input
+                                type="text"
+                                className="form-input flex-1 px-3 costom-dark-mod-input"
+                                placeholder="Invoice No:"
+                                id="invoiceNo"
+                                value={invoiceNo}
+                                onChange={(e)=>setInvoiceNo(e.target.value)}
+                              />
+                            </div>
+                            <div>
+                              <ul className="flex flex-wrap gap-2 py-1 md:text-[12px] text-[10px]">
+                                <li>
+                                  <b>Exampal:</b>
+                                </li>
+                                <li>Invoice No:</li>
+                                <li>Bill No:</li>
+                                <li>Proforma Invoice No:</li>
+                                <li>Receipt No:</li>
+                                <li>Purchase Order:</li>
+                              </ul>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="mb-3 px-2">
+                          <div className="flex flex-col md:grid grid-cols-12 items-center">
+                            <div className="flex items-center col-span-4 mb-2 md:mb-0">
                               <input
                                 type="checkbox"
-                                id="boldCheckbox"
-                                className="mr-2"
+                                id="AutoSetDueDate"
+                                className="form-checkbox h-5 w-5 text-indigo-600"
+                                checked={autoSetDueDate}
+                                onChange={handleCheckboxChange}
                               />
-                              <label htmlFor="boldCheckbox">Bold</label>
+                              <label htmlFor="AutoSetDueDate" className="ml-2">
+                                Auto set Due Date
+                              </label>
                             </div>
 
-                            <div className=" border p-2 flex items-center">
-                              <input
-                                type="checkbox"
-                                id="italicCheckbox"
-                                className="mr-2"
-                              />
-                              <label htmlFor="italicCheckbox">Italic</label>
+                            <div
+                              className={`col-span-8 ${
+                                autoSetDueDate ? "" : "opacity-50"
+                              }`}
+                            >
+                              <div className="grid grid-cols-12">
+                                <span className="px-2 py-1 bg-gray-200 text-gray-700 costom-dark-mod-input col-span-3">
+                                  Today Date +
+                                </span>
+                                <input
+                                  type="number"
+                                  className="form-input flex-1 px-2 py-1 ml-2 md:ml-0 bg-slate-200 costom-dark-mod-input col-span-6"
+                                  min="0"
+                                  value={numberOfDays}
+                                  onChange={handleNumberOfDaysChange}
+                                  disabled={!autoSetDueDate}
+                                />
+                                <span className="px-2 py-1 bg-gray-200 text-gray-700 ml-2 md:ml-0 costom-dark-mod-input col-span-3">
+                                  No of Day(s)
+                                </span>
+                              </div>
                             </div>
                           </div>
+                          {/*  */}
+                          <DateComponent>
+                            {(todayDate, futureDate) => (
+                              <div className="mt-1 md:text-[12px] text-[10px] ">
+                                <b>Example:</b>{" "}
+                                <span>
+                                  {todayDate} + 7 Days = {futureDate}
+                                </span>
+                              </div>
+                            )}
+                          </DateComponent>
                         </div>
                       </div>
                     </div>
                   </div>
-                  {/*  */}
-                  <div className="border border-gray-700 rounded-md ">
-                    <div className="px-">
-                      <div className="flex items-center costom-dark-mod-input">
-                        <div className="font-semibold text-xl py-1 px-2">
-                          QR Code
-                        </div>
-                        <div>
-                          <Switch {...label} />
-                        </div>
-                        <div>Active</div>
-                      </div>
-                      <div className="w-full bg-black h-[1px]"></div>
-                      <hr />
-
-                      <div className="px-2 py-2">
-                        <div className="mb-3 sm:flex w-full items-center">
-                          <span className="flex-shrink-0 px-3 py-2 bg-gray-200 text-gray-700 rounded-l-md costom-dark-mod">
-                            Test
-                          </span>
-
-                          <input
-                            type="text"
-                            className="flex-grow px-3 py-2 border border-gray-300 focus:outline-none focus:border-blue-500 costom-dark-mod-input"
-                            aria-label="Sizing example input"
-                            aria-describedby="inputGroup-sizing-default"
-                          />
-
-                          <div className=" p-1 flex items-center ">
-                            <Switch
-                              checked={checked}
-                              onChange={handleChangeButton}
-                              inputProps={{ "aria-label": "Append Invoice No" }}
-                            />
-                            <label
-                              htmlFor="appendInvoiceNo"
-                              onClick={handleChangeButton}
-                              className="cursor-pointer"
-                            >
-                              Append Invoice No
-                            </label>
-                          </div>
-                        </div>
-                        <div className="form-text pb-2">
-                          <b className="font-bold">Example:</b>
-                          <span className="ml-1">
-                            <span className="flex">
-                              https://www.example.com/pay?invoice=12345
-                            </span>
-                          </span>
-                          <span className="ml-1 font-bold">or</span>
-                          <span className="ml-1">
-                            What every text want to add in QR code
-                          </span>
-                        </div>
+                </div>
+                <div className=" md:grid grid-cols-12 py-5 gap-4 px-4">
+                  <div className="col-span-4 ">
+                    <div className="">
+                      <p>Invoice from</p>
+                      <div>
+                        <textarea
+                          // value={invoiceFrom}
+                          // onChange={(e) => setInvoicefrom(e.target.value)}
+                          placeholder="Who is this invoice from?"
+                          className="w-full border outline-none h-24 p-2 rounded-lg costom-dark-mod-input"
+                          name=""
+                          id=""
+                        ></textarea>
                       </div>
                     </div>
-
-                    {/*  */}
-                    <div className="flex flex-wrap items-center pb-5  px-2">
-                      {/* Text/Foreground Color */}
-                      <div className="flex items-center mb-2 md:mb-0">
-                        <label htmlFor="textColor" className="mr-2">
-                          Text/Foreground Color:
-                        </label>
-                        <div className="relative">
-                          {/* Color Picker for Text/Foreground Color */}
-                          <div
-                            className="cursor-pointer rounded-full sm:w-8 w-4 h-4 sm:h-8 md:w-10 md:h-10 bg-gray-300 border border-gray-400"
-                            style={{ backgroundColor: color }}
-                            onClick={togglePickerinput}
-                          />
-                          {showPicker && (
-                            <div className="absolute z-10 mt-2">
-                              <SketchPicker
-                                color={color}
-                                onChange={handleColorChangeinput}
-                              />
-                            </div>
-                          )}
-                        </div>
-                        {/* Text input for Text/Foreground Color */}
-                        <input
-                          type="text"
-                          id="textColor"
-                          className="ml-2 sm:w-full w-16 px-3 py-1 border border-gray-300 focus:outline-none focus:border-blue-500"
-                          style={{ backgroundColor: color, color: "#000" }}
-                          readOnly
-                        />
-                      </div>
-
-                      {/* Background Color */}
-                      <div className="flex items-center mb-2 md:mb-0 ml-0 md:ml-4">
-                        <label htmlFor="textColor2" className="mr-2">
-                          Background Color:
-                        </label>
-                        <div className="relative">
-                          {/* Color Picker for Background Color */}
-                          <div
-                            className="cursor-pointer rounded-full w-4 sm:w-8 h-4 sm:h-8 md:w-10 md:h-10 bg-gray-300 border border-gray-400"
-                            style={{ backgroundColor: color2 }}
-                            onClick={togglePickerinput2}
-                          />
-                          {showPicker2 && (
-                            <div className="absolute z-10 mt-2">
-                              <SketchPicker
-                                color={color2}
-                                onChange={handleColorChangeinput2}
-                              />
-                            </div>
-                          )}
-                        </div>
-                        {/* Text input for Background Color */}
-                        <input
-                          type="text"
-                          id="textColor2"
-                          className="ml-2 px-3 py-1 border sm:w-full w-16 border-gray-300 focus:outline-none focus:border-blue-500"
-                          style={{ backgroundColor: color2, color: "#FFFFFF" }}
-                          readOnly
-                        />
-                      </div>
-
-                      {/* ECC Level */}
-                      <div className="flex items-center mt-2 md:mt-0 ml-0 md:ml-4">
-                        <label htmlFor="qrCodeEccLevel" className="mr-2">
-                          ECC Level:
-                        </label>
-                        <select
-                          className="form-select mr-2 costom-dark-mod-input outline-none"
-                          name="qrCodeEccLevel"
-                          id="qrCodeEccLevel"
-                        >
-                          <option value="L">Low</option>
-                          <option value="M">Medium</option>
-                          <option value="Q">Quartile</option>
-                          <option value="H">High</option>
-                        </select>
-                        <span className="text-blue-500">
-                          <Link
-                            to="https://en.wikipedia.org/wiki/QR_code#Error_correction"
-                            target="_blank"
-                            rel="noreferrer"
-                            className="ml-2"
-                          >
-                            wiki
-                          </Link>
-                        </span>
+                  </div>
+                  <div className="col-span-4 ">
+                    <div className="">
+                      <p>Terms & Conditions</p>
+                      <div>
+                        <textarea
+                          // value={invoiceFrom}
+                          // onChange={(e) => setInvoicefrom(e.target.value)}
+                          placeholder="Terms and conditions - late fees, payment methods, delivery schedule"
+                          className="w-full border outline-none h-24 p-2 rounded-lg costom-dark-mod-input"
+                          name=""
+                          id=""
+                        ></textarea>
                       </div>
                     </div>
-
-                    {/*  */}
+                  </div>
+                  <div className="col-span-4 ">
+                    <div className="">
+                      <p>Foot Note</p>
+                      <div>
+                        <textarea
+                          // value={invoiceFrom}
+                          // onChange={(e) => setInvoicefrom(e.target.value)}
+                          placeholder="Thank you for your business"
+                          className="w-full border outline-none h-24 p-2 rounded-lg costom-dark-mod-input"
+                          name=""
+                          id=""
+                        ></textarea>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
+          </CustomTabPanel>
+          <CustomTabPanel value={value} index={1}>
+            <div className="md:h-[83vh]">
+              <div className="border border-gray-500 rounded pb-8 pt-4 ">
+                <div className="md:grid grid-cols-12 px-4">
+                  <div className="col-span-3">
+                    <div>
+                      <p className="py-2">Background Color</p>
+                      <SketchPicker
+                        color={selectedColor}
+                        onChange={handleColorChange}
+                      />
+                    </div>
+                    <div className="mt-4">
+                      <p>Selected Color:</p>
+                      <div
+                        className="w-12 h-12 rounded-md border border-gray-300"
+                        style={{ backgroundColor: selectedColor }}
+                      ></div>
+                    </div>
+                  </div>
+                  <div className="col-span-9">
+                    <div className="pb-5">
+                      <div className="md:grid grid-cols-12 gap-4">
+                        <div className="col-span-6">
+                          <div className="relative ">
+                            <div className="flex items-center border">
+                              <span className="input-group-text w-40">
+                                Page Orientation
+                              </span>
+                              <input
+                                type="text"
+                                className="form-input pl-10 pr-4 py-2  w-full costom-dark-mod-input"
+                                aria-label="Sizing example input"
+                                aria-describedby="inputGroup-sizing-default"
+                                value={pageOrientation}
+                                readOnly
+                                onClick={toggleMenu}
+                              />
+                              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                                <BsFillCaretDownFill
+                                  className="cursor-pointer text-gray-500"
+                                  onClick={toggleMenu}
+                                />
+                              </div>
+                            </div>
+                            {isOpen && (
+                              <div className="absolute mt-1 w-full rounded-md bg-white shadow-lg z-10 costom-dark-mod-input">
+                                <ul className="py-1">
+                                  {pageOrientationVal.map((option) => (
+                                    <li
+                                      key={option.value}
+                                      className="px-3 py-2 cursor-pointer hover:bg-gray-100 hover:text-black"
+                                      onClick={() =>
+                                        handleSelectpageOrientation(
+                                          option.value
+                                        )
+                                      }
+                                    >
+                                      {option.label}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        <div className="col-span-6">
+                          <div className="relative ">
+                            <div className="flex items-center border">
+                              <span className="input-group-text w-40">
+                                Page Size
+                              </span>
+                              <input
+                                type="text"
+                                className="form-input pl-10 pr-4 py-2  w-full costom-dark-mod-input"
+                                aria-label="Sizing example input"
+                                aria-describedby="inputGroup-sizing-default"
+                                value={pageSize}
+                                readOnly
+                                onClick={toggleMenuTex}
+                              />
+                              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                                <BsFillCaretDownFill
+                                  className="cursor-pointer text-gray-500"
+                                  onClick={toggleMenuTex}
+                                />
+                              </div>
+                            </div>
+                            {isOpenTex && (
+                              <div className="absolute mt-1 w-full rounded-md bg-white shadow-lg z-10 costom-dark-mod-input">
+                                <ul className="py-1">
+                                  {pageSizeVal.map((option) => (
+                                    <li
+                                      key={option.value}
+                                      className="px-3 py-2 cursor-pointer hover:bg-gray-100 hover:text-black"
+                                      onClick={() =>
+                                        handleSelectpageSize(option.value)
+                                      }
+                                    >
+                                      {option.label}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="pb-5">
+                      <div className="border border-gray-700 rounded-md ">
+                        <div className="px-">
+                          <div className="font-semibold text-2xl py-1 px-2 costom-dark-mod-input">
+                            Watermark
+                          </div>
+                          <div className="w-full bg-black h-[1px]"></div>
+                          <hr />
+                          <div className="px-2 py-2">
+                            <div className="mb-3 flex w-full">
+                              <span
+                                className="flex-shrink-0 px-3 py-2 bg-gray-200 text-gray-700 costom-dark-mod"
+                                id="inputGroup-sizing-default"
+                              >
+                                Default
+                              </span>
+                              <input
+                                type="text"
+                                className="flex-grow px-3 w-full py-2 rounded-r-md border border-gray-300 focus:outline-none focus:border-blue-500 costom-dark-mod-input"
+                                aria-label="Sizing example input"
+                                aria-describedby="inputGroup-sizing-default"
+                              />
+                            </div>
+                          </div>
+                          {/*  */}
+                          <div className="px-2 py-2">
+                            <div className="mb-3 sm:flex w-full items-center">
+                              <span className="flex-shrink-0 px-3 py-2 bg-gray-200 text-gray-700 rounded-l-md costom-dark-mod">
+                                Opacity
+                              </span>
+
+                              <input
+                                type="text"
+                                className="flex-grow px-3 py-2 border border-gray-300 focus:outline-none focus:border-blue-500 costom-dark-mod-input costom-dark-mod-input"
+                                aria-label="Sizing example input"
+                                aria-describedby="inputGroup-sizing-default"
+                              />
+                              <div className=" border p-2 flex items-center">
+                                <input
+                                  type="checkbox"
+                                  id="boldCheckbox"
+                                  className="mr-2"
+                                />
+                                <label htmlFor="boldCheckbox">Bold</label>
+                              </div>
+
+                              <div className=" border p-2 flex items-center">
+                                <input
+                                  type="checkbox"
+                                  id="italicCheckbox"
+                                  className="mr-2"
+                                />
+                                <label htmlFor="italicCheckbox">Italic</label>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    {/*  */}
+                    <div className="border border-gray-700 rounded-md ">
+                      <div className="px-">
+                        <div className="flex items-center costom-dark-mod-input">
+                          <div className="font-semibold text-xl py-1 px-2">
+                            QR Code
+                          </div>
+                          <div>
+                            <Switch {...label} />
+                          </div>
+                          <div>Active</div>
+                        </div>
+                        <div className="w-full bg-black h-[1px]"></div>
+                        <hr />
+
+                        <div className="px-2 py-2">
+                          <div className="mb-3 sm:flex w-full items-center">
+                            <span className="flex-shrink-0 px-3 py-2 bg-gray-200 text-gray-700 rounded-l-md costom-dark-mod">
+                              Test
+                            </span>
+
+                            <input
+                              type="text"
+                              className="flex-grow px-3 py-2 border border-gray-300 focus:outline-none focus:border-blue-500 costom-dark-mod-input"
+                              aria-label="Sizing example input"
+                              aria-describedby="inputGroup-sizing-default"
+                            />
+
+                            <div className=" p-1 flex items-center ">
+                              <Switch
+                                checked={checked}
+                                onChange={handleChangeButton}
+                                inputProps={{
+                                  "aria-label": "Append Invoice No",
+                                }}
+                              />
+                              <label
+                                htmlFor="appendInvoiceNo"
+                                onClick={handleChangeButton}
+                                className="cursor-pointer"
+                              >
+                                Append Invoice No
+                              </label>
+                            </div>
+                          </div>
+                          <div className="form-text pb-2">
+                            <b className="font-bold">Example:</b>
+                            <span className="ml-1">
+                              <span className="flex">
+                                https://www.example.com/pay?invoice=12345
+                              </span>
+                            </span>
+                            <span className="ml-1 font-bold">or</span>
+                            <span className="ml-1">
+                              What every text want to add in QR code
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/*  */}
+                      <div className="flex flex-wrap items-center pb-5  px-2">
+                        {/* Text/Foreground Color */}
+                        <div className="flex items-center mb-2 md:mb-0">
+                          <label htmlFor="textColor" className="mr-2">
+                            Text/Foreground Color:
+                          </label>
+                          <div className="relative">
+                            {/* Color Picker for Text/Foreground Color */}
+                            <div
+                              className="cursor-pointer rounded-full sm:w-8 w-4 h-4 sm:h-8 md:w-10 md:h-10 bg-gray-300 border border-gray-400"
+                              style={{ backgroundColor: color }}
+                              onClick={togglePickerinput}
+                            />
+                            {showPicker && (
+                              <div className="absolute z-10 mt-2">
+                                <SketchPicker
+                                  color={color}
+                                  onChange={handleColorChangeinput}
+                                />
+                              </div>
+                            )}
+                          </div>
+                          {/* Text input for Text/Foreground Color */}
+                          <input
+                            type="text"
+                            id="textColor"
+                            className="ml-2 sm:w-full w-16 px-3 py-1 border border-gray-300 focus:outline-none focus:border-blue-500"
+                            style={{ backgroundColor: color, color: "#000" }}
+                            readOnly
+                          />
+                        </div>
+
+                        {/* Background Color */}
+                        <div className="flex items-center mb-2 md:mb-0 ml-0 md:ml-4">
+                          <label htmlFor="textColor2" className="mr-2">
+                            Background Color:
+                          </label>
+                          <div className="relative">
+                            {/* Color Picker for Background Color */}
+                            <div
+                              className="cursor-pointer rounded-full w-4 sm:w-8 h-4 sm:h-8 md:w-10 md:h-10 bg-gray-300 border border-gray-400"
+                              style={{ backgroundColor: color2 }}
+                              onClick={togglePickerinput2}
+                            />
+                            {showPicker2 && (
+                              <div className="absolute z-10 mt-2">
+                                <SketchPicker
+                                  color={color2}
+                                  onChange={handleColorChangeinput2}
+                                />
+                              </div>
+                            )}
+                          </div>
+                          {/* Text input for Background Color */}
+                          <input
+                            type="text"
+                            id="textColor2"
+                            className="ml-2 px-3 py-1 border sm:w-full w-16 border-gray-300 focus:outline-none focus:border-blue-500"
+                            style={{
+                              backgroundColor: color2,
+                              color: "#FFFFFF",
+                            }}
+                            readOnly
+                          />
+                        </div>
+
+                        {/* ECC Level */}
+                        <div className="flex items-center mt-2 md:mt-0 ml-0 md:ml-4">
+                          <label htmlFor="qrCodeEccLevel" className="mr-2">
+                            ECC Level:
+                          </label>
+                          <select
+                            className="form-select mr-2 costom-dark-mod-input outline-none"
+                            name="qrCodeEccLevel"
+                            id="qrCodeEccLevel"
+                          >
+                            <option value="L">Low</option>
+                            <option value="M">Medium</option>
+                            <option value="Q">Quartile</option>
+                            <option value="H">High</option>
+                          </select>
+                          <span className="text-blue-500">
+                            <Link
+                              to="https://en.wikipedia.org/wiki/QR_code#Error_correction"
+                              target="_blank"
+                              rel="noreferrer"
+                              className="ml-2"
+                            >
+                              wiki
+                            </Link>
+                          </span>
+                        </div>
+                      </div>
+
+                      {/*  */}
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </CustomTabPanel>
           <CustomTabPanel value={value} index={2}>
@@ -869,7 +910,7 @@ const Setting = () => {
                       <CardContent></CardContent>
                     </CardActionArea>
                     <CardActions className="costom-dark-mod-input">
-                      <label >
+                      <label>
                         <input
                           type="radio"
                           name="template"
@@ -936,7 +977,7 @@ const Setting = () => {
                   </Card>
                 </div>
                 <div className="lg:col-span-3 md:col-span-4 border border-black">
-                <Card>
+                  <Card>
                     <CardActionArea>
                       <CardMedia
                         component="img"
@@ -975,7 +1016,7 @@ const Setting = () => {
                   </Card>
                 </div>
                 <div className="lg:col-span-3 md:col-span-4 border border-black">
-                <Card>
+                  <Card>
                     <CardActionArea>
                       <CardMedia
                         component="img"
@@ -1014,7 +1055,7 @@ const Setting = () => {
                   </Card>
                 </div>
                 <div className="lg:col-span-3 md:col-span-4 border border-black">
-                <Card>
+                  <Card>
                     <CardActionArea>
                       <CardMedia
                         component="img"
@@ -1053,7 +1094,7 @@ const Setting = () => {
                   </Card>
                 </div>
                 <div className="lg:col-span-3 md:col-span-4 border border-black">
-                <Card>
+                  <Card>
                     <CardActionArea>
                       <CardMedia
                         component="img"
