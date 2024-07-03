@@ -9,6 +9,11 @@ import { BsFillCaretDownFill } from "react-icons/bs";
 import { SketchPicker } from "react-color";
 import Switch from "@mui/material/Switch";
 import { Link } from "react-router-dom";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import CardMedia from "@mui/material/CardMedia";
+import Typography from "@mui/material/Typography";
+import { Button, CardActionArea, CardActions } from "@mui/material";
 
 const currencies = [
   { value: "USD", label: "USD" },
@@ -85,13 +90,20 @@ const Setting = () => {
     setValue(newValue);
   };
 
-  const [color, setColor] = React.useState("#000"); 
-  const [color2, setColor2] = React.useState("#FFFFFF"); 
-  const [taxationPercentageGst, setTaxationPercentageGst] = React.useState('');
-  const [taxationPercentageDescount, setTaxationPercentageDescount] = React.useState('');
-  const [taxationPercentageShipping, setTaxationPercentageShipping] = React.useState('');
+  const [color, setColor] = React.useState("#000");
+  const [color2, setColor2] = React.useState("#FFFFFF");
+  const [taxationPercentageGst, setTaxationPercentageGst] = React.useState("");
+  const [taxationPercentageDescount, setTaxationPercentageDescount] =
+    React.useState("");
+  const [taxationPercentageShipping, setTaxationPercentageShipping] =
+    React.useState("");
   const [showPicker, setShowPicker] = React.useState(false);
   const [showPicker2, setShowPicker2] = React.useState(false);
+  const [selectedTemplate, setSelectedTemplate] = React.useState("Template 1"); // State to keep track of selected template
+
+  const handleTemplateSelect = (templateName) => {
+    setSelectedTemplate(templateName); // Update the selected template state
+  };
 
   const handleInputChangeGst = (event) => {
     setTaxationPercentageGst(event.target.value);
@@ -199,7 +211,7 @@ const Setting = () => {
   return (
     <>
       <NavBar />
-      <div className="costom-dark-mod md:h-[93vh]">
+      <div className="costom-dark-mod ">
         <Box sx={{ width: "100%" }}>
           <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
             <Tabs
@@ -207,12 +219,28 @@ const Setting = () => {
               onChange={handleChange}
               aria-label="basic tabs example"
             >
-              <Tab sx={{fontSize:12,letterSpacing:0}} className="costom-dark-mod-input border " label="Default Settings" {...a11yProps(0)} />
-              <Tab  sx={{fontSize:12,letterSpacing:0}} className="costom-dark-mod-input" label="PDF Settings" {...a11yProps(1)} />
-              <Tab  sx={{fontSize:12,letterSpacing:0}} className="costom-dark-mod-input" label="Template" {...a11yProps(2)} />
+              <Tab
+                sx={{ fontSize: 12, letterSpacing: 0 }}
+                className="costom-dark-mod-input border "
+                label="Default Settings"
+                {...a11yProps(0)}
+              />
+              <Tab
+                sx={{ fontSize: 12, letterSpacing: 0 }}
+                className="costom-dark-mod-input"
+                label="PDF Settings"
+                {...a11yProps(1)}
+              />
+              <Tab
+                sx={{ fontSize: 12, letterSpacing: 0 }}
+                className="costom-dark-mod-input"
+                label="Template"
+                {...a11yProps(2)}
+              />
             </Tabs>
           </Box>
           <CustomTabPanel value={value} index={0}>
+            <div className="md:h-[82vh]">
             <div className="border border-gray-500 rounded pb-8">
               <div className="md:grid grid-cols-12 px-4">
                 <div className="col-span-5 ">
@@ -501,9 +529,11 @@ const Setting = () => {
                 </div>
               </div>
             </div>
+            </div>
           </CustomTabPanel>
           <CustomTabPanel value={value} index={1}>
-            <div className="border border-gray-500 rounded pb-8">
+            <div className="md:h-[83vh]">
+            <div className="border border-gray-500 rounded pb-8 pt-4 ">
               <div className="md:grid grid-cols-12 px-4">
                 <div className="col-span-3">
                   <div>
@@ -822,9 +852,247 @@ const Setting = () => {
                 </div>
               </div>
             </div>
+            </div>
           </CustomTabPanel>
           <CustomTabPanel value={value} index={2}>
-          Template Tab
+            <div className="border border-black pb-8 rounded">
+              <div className="md:grid grid-cols-12 gap-5 px-4 md:space-y-0 space-y-5 ">
+                <div className="lg:col-span-3 md:col-span-4 border border-black">
+                  <Card>
+                    <CardActionArea>
+                      <CardMedia
+                        component="img"
+                        height="140"
+                        image="/Template/Template 1.jpg"
+                        alt="green iguana"
+                      />
+                      <CardContent></CardContent>
+                    </CardActionArea>
+                    <CardActions className="costom-dark-mod-input">
+                      <label >
+                        <input
+                          type="radio"
+                          name="template"
+                          style={{ display: "none" }} // Hide the actual radio button
+                          onChange={() => handleTemplateSelect("Template 1")}
+                        />
+                        <Button
+                          size="small"
+                          style={{
+                            backgroundColor:
+                              selectedTemplate === "Template 1"
+                                ? "#1976d2"
+                                : "white",
+                            color:
+                              selectedTemplate === "Template 1"
+                                ? "white"
+                                : "black",
+                          }}
+                          onClick={() => handleTemplateSelect("Template 1")}
+                        >
+                          Template 1
+                        </Button>
+                      </label>
+                    </CardActions>
+                  </Card>
+                </div>
+                <div className="lg:col-span-3 md:col-span-4 border border-black">
+                  <Card>
+                    <CardActionArea>
+                      <CardMedia
+                        component="img"
+                        height="140"
+                        image="/Template/Template 2.jpg"
+                        alt="green iguana"
+                      />
+                      <CardContent></CardContent>
+                    </CardActionArea>
+                    <CardActions className="costom-dark-mod-input">
+                      <label>
+                        <input
+                          type="radio"
+                          name="template"
+                          style={{ display: "none" }} // Hide the actual radio button
+                          onChange={() => handleTemplateSelect("Template 2")}
+                        />
+                        <Button
+                          size="small"
+                          style={{
+                            backgroundColor:
+                              selectedTemplate === "Template 2"
+                                ? "#1976d2"
+                                : "white",
+                            color:
+                              selectedTemplate === "Template 2"
+                                ? "white"
+                                : "black",
+                          }}
+                          onClick={() => handleTemplateSelect("Template 2")}
+                        >
+                          Template 2
+                        </Button>
+                      </label>
+                    </CardActions>
+                  </Card>
+                </div>
+                <div className="lg:col-span-3 md:col-span-4 border border-black">
+                <Card>
+                    <CardActionArea>
+                      <CardMedia
+                        component="img"
+                        height="140"
+                        image="/Template/Template 3.jpg"
+                        alt="green iguana"
+                      />
+                      <CardContent></CardContent>
+                    </CardActionArea>
+                    <CardActions className="costom-dark-mod-input">
+                      <label>
+                        <input
+                          type="radio"
+                          name="template"
+                          style={{ display: "none" }} // Hide the actual radio button
+                          onChange={() => handleTemplateSelect("Template 3")}
+                        />
+                        <Button
+                          size="small"
+                          style={{
+                            backgroundColor:
+                              selectedTemplate === "Template 3"
+                                ? "#1976d2"
+                                : "white",
+                            color:
+                              selectedTemplate === "Template 3"
+                                ? "white"
+                                : "black",
+                          }}
+                          onClick={() => handleTemplateSelect("Template 3")}
+                        >
+                          Template 3
+                        </Button>
+                      </label>
+                    </CardActions>
+                  </Card>
+                </div>
+                <div className="lg:col-span-3 md:col-span-4 border border-black">
+                <Card>
+                    <CardActionArea>
+                      <CardMedia
+                        component="img"
+                        height="140"
+                        image="/Template/Template 2.jpg"
+                        alt="green iguana"
+                      />
+                      <CardContent></CardContent>
+                    </CardActionArea>
+                    <CardActions className="costom-dark-mod-input">
+                      <label>
+                        <input
+                          type="radio"
+                          name="template"
+                          style={{ display: "none" }} // Hide the actual radio button
+                          onChange={() => handleTemplateSelect("Template 4")}
+                        />
+                        <Button
+                          size="small"
+                          style={{
+                            backgroundColor:
+                              selectedTemplate === "Template 4"
+                                ? "#1976d2"
+                                : "white",
+                            color:
+                              selectedTemplate === "Template 4"
+                                ? "white"
+                                : "black",
+                          }}
+                          onClick={() => handleTemplateSelect("Template 4")}
+                        >
+                          Template 4
+                        </Button>
+                      </label>
+                    </CardActions>
+                  </Card>
+                </div>
+                <div className="lg:col-span-3 md:col-span-4 border border-black">
+                <Card>
+                    <CardActionArea>
+                      <CardMedia
+                        component="img"
+                        height="140"
+                        image="/Template/Template 5.jpg"
+                        alt="green iguana"
+                      />
+                      <CardContent></CardContent>
+                    </CardActionArea>
+                    <CardActions className="costom-dark-mod-input">
+                      <label>
+                        <input
+                          type="radio"
+                          name="template"
+                          style={{ display: "none" }} // Hide the actual radio button
+                          onChange={() => handleTemplateSelect("Template 5")}
+                        />
+                        <Button
+                          size="small"
+                          style={{
+                            backgroundColor:
+                              selectedTemplate === "Template 5"
+                                ? "#1976d2"
+                                : "white",
+                            color:
+                              selectedTemplate === "Template 5"
+                                ? "white"
+                                : "black",
+                          }}
+                          onClick={() => handleTemplateSelect("Template 5")}
+                        >
+                          Template 5
+                        </Button>
+                      </label>
+                    </CardActions>
+                  </Card>
+                </div>
+                <div className="lg:col-span-3 md:col-span-4 border border-black">
+                <Card>
+                    <CardActionArea>
+                      <CardMedia
+                        component="img"
+                        height="140"
+                        image="/Template/Template 2.jpg"
+                        alt="green iguana"
+                      />
+                      <CardContent></CardContent>
+                    </CardActionArea>
+                    <CardActions className="costom-dark-mod-input">
+                      <label>
+                        <input
+                          type="radio"
+                          name="template"
+                          style={{ display: "none" }} // Hide the actual radio button
+                          onChange={() => handleTemplateSelect("Template 6")}
+                        />
+                        <Button
+                          size="small"
+                          style={{
+                            backgroundColor:
+                              selectedTemplate === "Template 6"
+                                ? "#1976d2"
+                                : "white",
+                            color:
+                              selectedTemplate === "Template 6"
+                                ? "white"
+                                : "black",
+                          }}
+                          onClick={() => handleTemplateSelect("Template 6")}
+                        >
+                          Template 6
+                        </Button>
+                      </label>
+                    </CardActions>
+                  </Card>
+                </div>
+              </div>
+            </div>
           </CustomTabPanel>
         </Box>
       </div>
