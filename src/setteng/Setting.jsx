@@ -21,6 +21,7 @@ const currencies = [
 
 const Taxations = [
   { value: "VAT", label: "VAT" },
+  { value: "GST", label: "GST" },
   { value: "SST", label: "SST" },
   { value: "TAX", label: "TAX" },
   { value: "PPN", label: "PPN" },
@@ -84,10 +85,23 @@ const Setting = () => {
     setValue(newValue);
   };
 
-  const [color, setColor] = React.useState("#000"); // Initial color state, white in this case
-  const [color2, setColor2] = React.useState("#FFFFFF"); // Initial color state, white in this case
+  const [color, setColor] = React.useState("#000"); 
+  const [color2, setColor2] = React.useState("#FFFFFF"); 
+  const [taxationPercentageGst, setTaxationPercentageGst] = React.useState('');
+  const [taxationPercentageDescount, setTaxationPercentageDescount] = React.useState('');
+  const [taxationPercentageShipping, setTaxationPercentageShipping] = React.useState('');
   const [showPicker, setShowPicker] = React.useState(false);
   const [showPicker2, setShowPicker2] = React.useState(false);
+
+  const handleInputChangeGst = (event) => {
+    setTaxationPercentageGst(event.target.value);
+  };
+  const handleInputChangeDescount = (event) => {
+    setTaxationPercentageDescount(event.target.value);
+  };
+  const handleInputChangeShipping = (event) => {
+    setTaxationPercentageShipping(event.target.value);
+  };
 
   const handleColorChangeinput = (newColor) => {
     setColor(newColor.hex);
@@ -185,7 +199,7 @@ const Setting = () => {
   return (
     <>
       <NavBar />
-      <div className="costom-dark-mod h-[93vh]">
+      <div className="costom-dark-mod md:h-[93vh]">
         <Box sx={{ width: "100%" }}>
           <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
             <Tabs
@@ -193,14 +207,14 @@ const Setting = () => {
               onChange={handleChange}
               aria-label="basic tabs example"
             >
-              <Tab label="Default Settings" {...a11yProps(0)} />
-              <Tab label="PDF Settings" {...a11yProps(1)} />
-              <Tab label="Template" {...a11yProps(2)} />
+              <Tab sx={{fontSize:12,letterSpacing:0}} className="costom-dark-mod-input border " label="Default Settings" {...a11yProps(0)} />
+              <Tab  sx={{fontSize:12,letterSpacing:0}} className="costom-dark-mod-input" label="PDF Settings" {...a11yProps(1)} />
+              <Tab  sx={{fontSize:12,letterSpacing:0}} className="costom-dark-mod-input" label="Template" {...a11yProps(2)} />
             </Tabs>
           </Box>
           <CustomTabPanel value={value} index={0}>
-            <div>
-              <div className="md:grid grid-cols-12 ">
+            <div className="border border-gray-500 rounded pb-8">
+              <div className="md:grid grid-cols-12 px-4">
                 <div className="col-span-5 ">
                   <div className="p-2">
                     {isImageSelected && image ? (
@@ -238,14 +252,14 @@ const Setting = () => {
                           <span className="input-group-text">Currency</span>
                           <input
                             type="text"
-                            className="form-input pl-10 pr-4 py-2 rounded-md w-full"
+                            className="form-input pl-10 pr-4 py-2  w-full costom-dark-mod-input outline-none"
                             aria-label="Sizing example input"
                             aria-describedby="inputGroup-sizing-default"
                             value={currency}
                             readOnly
                             onClick={toggleMenu}
                           />
-                          <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                          <div className="absolute right-3 top-1/2 transform -translate-y-1/2 ">
                             <BsFillCaretDownFill
                               className="cursor-pointer text-gray-500"
                               onClick={toggleMenu}
@@ -253,12 +267,12 @@ const Setting = () => {
                           </div>
                         </div>
                         {isOpen && (
-                          <div className="absolute mt-1 w-full rounded-md bg-white shadow-lg">
+                          <div className="absolute  w-full rounded-md bg-white ">
                             <ul className="py-1">
                               {currencies.map((option) => (
                                 <li
                                   key={option.value}
-                                  className="px-3 py-2 cursor-pointer hover:bg-gray-100"
+                                  className="px-3 py-2 cursor-pointer hover:bg-gray-100 hover:text-black costom-dark-mod-input "
                                   onClick={() =>
                                     handleSelectCurrency(option.value)
                                   }
@@ -277,7 +291,7 @@ const Setting = () => {
                           <span className="input-group-text">Taxation</span>
                           <input
                             type="text"
-                            className="form-input pl-10 pr-4 py-2 rounded-md w-full"
+                            className="form-input pl-10 pr-4 py-2  w-full outline-none costom-dark-mod-input"
                             aria-label="Sizing example input"
                             aria-describedby="inputGroup-sizing-default"
                             value={taxation}
@@ -292,12 +306,12 @@ const Setting = () => {
                           </div>
                         </div>
                         {isOpenTex && (
-                          <div className="absolute mt-1 w-full rounded-md bg-white shadow-lg">
+                          <div className="absolute mt-1 w-full rounded-md bg-white shadow-lg costom-dark-mod-input">
                             <ul className="py-1">
                               {Taxations.map((option) => (
                                 <li
                                   key={option.value}
-                                  className="px-3 py-2 cursor-pointer hover:bg-gray-100"
+                                  className="px-3 py-2 cursor-pointer hover:bg-gray-100 hover:text-black"
                                   onClick={() => handleSelectTex(option.value)}
                                 >
                                   {option.label}
@@ -322,10 +336,11 @@ const Setting = () => {
                             </label>
                             <input
                               type="number"
-                              className="form-input flex-1"
+                              value={taxationPercentageGst}
+                              onChange={handleInputChangeGst}
+                              className="form-input flex-1 costom-dark-mod-input"
                               placeholder="Taxation Percentage"
                               id="taxationPer"
-                              value=""
                             />
                           </div>
                         </div>
@@ -339,10 +354,11 @@ const Setting = () => {
                             </label>
                             <input
                               type="number"
-                              className="form-input flex-1 px-3"
+                              value={taxationPercentageDescount}
+                              onChange={handleInputChangeDescount}
+                              className="form-input flex-1 px-3 costom-dark-mod-input"
                               placeholder="Discounts"
                               id="discounts"
-                              value=""
                             />
                           </div>
                         </div>
@@ -356,10 +372,11 @@ const Setting = () => {
                             </label>
                             <input
                               type="number"
-                              className="form-input flex-1 px-3"
+                              value={taxationPercentageShipping}
+                              onChange={handleInputChangeShipping}
+                              className="form-input w-full flex-1 px-3 costom-dark-mod-input"
                               placeholder="Shipping"
                               id="shipping"
-                              value=""
                             />
                           </div>
                         </div>
@@ -375,7 +392,7 @@ const Setting = () => {
                             </label>
                             <input
                               type="text"
-                              className="form-input flex-1 px-3"
+                              className="form-input flex-1 px-3 costom-dark-mod-input"
                               placeholder="Invoice No:"
                               id="invoiceNo"
                               value=""
@@ -408,19 +425,19 @@ const Setting = () => {
                             </label>
                           </div>
 
-                          <div className="flex flex-col md:flex-row justify-between items-center col-span-8">
-                            <div className="flex items-center mb-2 md:mb-0">
-                              <span className="px-2 py-1 bg-gray-200 text-gray-700">
+                          <div className="col-span-8">
+                            <div className="grid grid-cols-12">
+                              <span className="px-2 py-1 bg-gray-200 text-gray-700 costom-dark-mod-input col-span-3">
                                 Today Date +
                               </span>
                               <input
                                 type="number"
-                                className="form-input flex-1 px-2 py-1 ml-2 md:ml-0"
+                                className="form-input flex-1 px-2 py-1 ml-2 md:ml-0 bg-slate-200 costom-dark-mod-input col-span-6"
                                 min="0"
                                 value="0"
                                 disabled
                               />
-                              <span className="px-2 py-1 bg-gray-200 text-gray-700 ml-2 md:ml-0">
+                              <span className="px-2 py-1 bg-gray-200 text-gray-700 ml-2 md:ml-0 costom-dark-mod-input col-span-3">
                                 No of Day(s)
                               </span>
                             </div>
@@ -436,7 +453,7 @@ const Setting = () => {
                   </div>
                 </div>
               </div>
-              <div className=" md:grid grid-cols-12 py-5 gap-4">
+              <div className=" md:grid grid-cols-12 py-5 gap-4 px-4">
                 <div className="col-span-4 ">
                   <div className="">
                     <p>Invoice from</p>
@@ -486,8 +503,8 @@ const Setting = () => {
             </div>
           </CustomTabPanel>
           <CustomTabPanel value={value} index={1}>
-            <div>
-              <div className="md:grid grid-cols-12">
+            <div className="border border-gray-500 rounded pb-8">
+              <div className="md:grid grid-cols-12 px-4">
                 <div className="col-span-3">
                   <div>
                     <p className="py-2">Background Color</p>
@@ -515,7 +532,7 @@ const Setting = () => {
                             </span>
                             <input
                               type="text"
-                              className="form-input pl-10 pr-4 py-2 rounded-md w-full"
+                              className="form-input pl-10 pr-4 py-2  w-full costom-dark-mod-input"
                               aria-label="Sizing example input"
                               aria-describedby="inputGroup-sizing-default"
                               value={pageOrientation}
@@ -530,12 +547,12 @@ const Setting = () => {
                             </div>
                           </div>
                           {isOpen && (
-                            <div className="absolute mt-1 w-full rounded-md bg-white shadow-lg z-10">
+                            <div className="absolute mt-1 w-full rounded-md bg-white shadow-lg z-10 costom-dark-mod-input">
                               <ul className="py-1">
                                 {pageOrientationVal.map((option) => (
                                   <li
                                     key={option.value}
-                                    className="px-3 py-2 cursor-pointer hover:bg-gray-100"
+                                    className="px-3 py-2 cursor-pointer hover:bg-gray-100 hover:text-black"
                                     onClick={() =>
                                       handleSelectpageOrientation(option.value)
                                     }
@@ -556,7 +573,7 @@ const Setting = () => {
                             </span>
                             <input
                               type="text"
-                              className="form-input pl-10 pr-4 py-2 rounded-md w-full"
+                              className="form-input pl-10 pr-4 py-2  w-full costom-dark-mod-input"
                               aria-label="Sizing example input"
                               aria-describedby="inputGroup-sizing-default"
                               value={pageSize}
@@ -571,12 +588,12 @@ const Setting = () => {
                             </div>
                           </div>
                           {isOpenTex && (
-                            <div className="absolute mt-1 w-full rounded-md bg-white shadow-lg z-10">
+                            <div className="absolute mt-1 w-full rounded-md bg-white shadow-lg z-10 costom-dark-mod-input">
                               <ul className="py-1">
                                 {pageSizeVal.map((option) => (
                                   <li
                                     key={option.value}
-                                    className="px-3 py-2 cursor-pointer hover:bg-gray-100"
+                                    className="px-3 py-2 cursor-pointer hover:bg-gray-100 hover:text-black"
                                     onClick={() =>
                                       handleSelectpageSize(option.value)
                                     }
@@ -592,9 +609,9 @@ const Setting = () => {
                     </div>
                   </div>
                   <div className="pb-5">
-                    <div className="border border-black rounded-md ">
+                    <div className="border border-gray-700 rounded-md ">
                       <div className="px-">
-                        <div className="font-semibold text-2xl py-1 px-2">
+                        <div className="font-semibold text-2xl py-1 px-2 costom-dark-mod-input">
                           Watermark
                         </div>
                         <div className="w-full bg-black h-[1px]"></div>
@@ -602,14 +619,14 @@ const Setting = () => {
                         <div className="px-2 py-2">
                           <div className="mb-3 flex w-full">
                             <span
-                              className="flex-shrink-0 px-3 py-2 bg-gray-200 text-gray-700"
+                              className="flex-shrink-0 px-3 py-2 bg-gray-200 text-gray-700 costom-dark-mod"
                               id="inputGroup-sizing-default"
                             >
                               Default
                             </span>
                             <input
                               type="text"
-                              className="flex-grow px-3 py-2 rounded-r-md border border-gray-300 focus:outline-none focus:border-blue-500"
+                              className="flex-grow px-3 w-full py-2 rounded-r-md border border-gray-300 focus:outline-none focus:border-blue-500 costom-dark-mod-input"
                               aria-label="Sizing example input"
                               aria-describedby="inputGroup-sizing-default"
                             />
@@ -617,18 +634,17 @@ const Setting = () => {
                         </div>
                         {/*  */}
                         <div className="px-2 py-2">
-                          <div className="mb-3 flex w-full items-center">
-                            <span className="flex-shrink-0 px-3 py-2 bg-gray-200 text-gray-700 rounded-l-md">
+                          <div className="mb-3 sm:flex w-full items-center">
+                            <span className="flex-shrink-0 px-3 py-2 bg-gray-200 text-gray-700 rounded-l-md costom-dark-mod">
                               Opacity
                             </span>
 
                             <input
                               type="text"
-                              className="flex-grow px-3 py-2 border border-gray-300 focus:outline-none focus:border-blue-500 "
+                              className="flex-grow px-3 py-2 border border-gray-300 focus:outline-none focus:border-blue-500 costom-dark-mod-input costom-dark-mod-input"
                               aria-label="Sizing example input"
                               aria-describedby="inputGroup-sizing-default"
                             />
-
                             <div className=" border p-2 flex items-center">
                               <input
                                 type="checkbox"
@@ -652,9 +668,9 @@ const Setting = () => {
                     </div>
                   </div>
                   {/*  */}
-                  <div className="border border-black rounded-md ">
+                  <div className="border border-gray-700 rounded-md ">
                     <div className="px-">
-                      <div className="flex items-center">
+                      <div className="flex items-center costom-dark-mod-input">
                         <div className="font-semibold text-xl py-1 px-2">
                           QR Code
                         </div>
@@ -667,19 +683,19 @@ const Setting = () => {
                       <hr />
 
                       <div className="px-2 py-2">
-                        <div className="mb-3 flex w-full items-center">
-                          <span className="flex-shrink-0 px-3 py-2 bg-gray-200 text-gray-700 rounded-l-md">
+                        <div className="mb-3 sm:flex w-full items-center">
+                          <span className="flex-shrink-0 px-3 py-2 bg-gray-200 text-gray-700 rounded-l-md costom-dark-mod">
                             Test
                           </span>
 
                           <input
                             type="text"
-                            className="flex-grow px-3 py-2 border border-gray-300 focus:outline-none focus:border-blue-500"
+                            className="flex-grow px-3 py-2 border border-gray-300 focus:outline-none focus:border-blue-500 costom-dark-mod-input"
                             aria-label="Sizing example input"
                             aria-describedby="inputGroup-sizing-default"
                           />
 
-                          <div className="border p-1 flex items-center ">
+                          <div className=" p-1 flex items-center ">
                             <Switch
                               checked={checked}
                               onChange={handleChangeButton}
@@ -694,10 +710,10 @@ const Setting = () => {
                             </label>
                           </div>
                         </div>
-                        <div className="form-text mb-3">
+                        <div className="form-text pb-2">
                           <b className="font-bold">Example:</b>
                           <span className="ml-1">
-                            <span className="">
+                            <span className="flex">
                               https://www.example.com/pay?invoice=12345
                             </span>
                           </span>
@@ -710,7 +726,7 @@ const Setting = () => {
                     </div>
 
                     {/*  */}
-                    <div className="flex flex-wrap items-center mb-4 px-2">
+                    <div className="flex flex-wrap items-center pb-5  px-2">
                       {/* Text/Foreground Color */}
                       <div className="flex items-center mb-2 md:mb-0">
                         <label htmlFor="textColor" className="mr-2">
@@ -719,7 +735,7 @@ const Setting = () => {
                         <div className="relative">
                           {/* Color Picker for Text/Foreground Color */}
                           <div
-                            className="cursor-pointer rounded-full w-8 h-8 md:w-10 md:h-10 bg-gray-300 border border-gray-400"
+                            className="cursor-pointer rounded-full sm:w-8 w-4 h-4 sm:h-8 md:w-10 md:h-10 bg-gray-300 border border-gray-400"
                             style={{ backgroundColor: color }}
                             onClick={togglePickerinput}
                           />
@@ -736,7 +752,7 @@ const Setting = () => {
                         <input
                           type="text"
                           id="textColor"
-                          className="ml-2 px-3 py-1 border border-gray-300 focus:outline-none focus:border-blue-500"
+                          className="ml-2 sm:w-full w-16 px-3 py-1 border border-gray-300 focus:outline-none focus:border-blue-500"
                           style={{ backgroundColor: color, color: "#000" }}
                           readOnly
                         />
@@ -750,7 +766,7 @@ const Setting = () => {
                         <div className="relative">
                           {/* Color Picker for Background Color */}
                           <div
-                            className="cursor-pointer rounded-full w-8 h-8 md:w-10 md:h-10 bg-gray-300 border border-gray-400"
+                            className="cursor-pointer rounded-full w-4 sm:w-8 h-4 sm:h-8 md:w-10 md:h-10 bg-gray-300 border border-gray-400"
                             style={{ backgroundColor: color2 }}
                             onClick={togglePickerinput2}
                           />
@@ -767,7 +783,7 @@ const Setting = () => {
                         <input
                           type="text"
                           id="textColor2"
-                          className="ml-2 px-3 py-1 border border-gray-300 focus:outline-none focus:border-blue-500"
+                          className="ml-2 px-3 py-1 border sm:w-full w-16 border-gray-300 focus:outline-none focus:border-blue-500"
                           style={{ backgroundColor: color2, color: "#FFFFFF" }}
                           readOnly
                         />
@@ -779,7 +795,7 @@ const Setting = () => {
                           ECC Level:
                         </label>
                         <select
-                          className="form-select mr-2"
+                          className="form-select mr-2 costom-dark-mod-input outline-none"
                           name="qrCodeEccLevel"
                           id="qrCodeEccLevel"
                         >
@@ -789,14 +805,14 @@ const Setting = () => {
                           <option value="H">High</option>
                         </select>
                         <span className="text-blue-500">
-                          <a
-                            href="https://en.wikipedia.org/wiki/QR_code#Error_correction"
+                          <Link
+                            to="https://en.wikipedia.org/wiki/QR_code#Error_correction"
                             target="_blank"
                             rel="noreferrer"
                             className="ml-2"
                           >
                             wiki
-                          </a>
+                          </Link>
                         </span>
                       </div>
                     </div>
@@ -808,7 +824,7 @@ const Setting = () => {
             </div>
           </CustomTabPanel>
           <CustomTabPanel value={value} index={2}>
-            Item Three
+          Template Tab
           </CustomTabPanel>
         </Box>
       </div>

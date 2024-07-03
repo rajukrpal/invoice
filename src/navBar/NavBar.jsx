@@ -2,7 +2,7 @@
 
 
 import React, { useState, useEffect } from 'react';
-import { Link, Outlet } from 'react-router-dom';
+import { Link, NavLink, Outlet } from 'react-router-dom';
 import ArticleIcon from '@mui/icons-material/Article';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
@@ -132,38 +132,42 @@ const NavBar = ({ toggleDarkMode  }) => {
           } transition-all duration-300`}
         >
           <ul className="pt-4 pl-4">
-            <li>
-              <Link
+            <li className='py-1'>
+              <NavLink
+              
                 to={'/'}
                 onClick={() => {
                   toggleMenu();
                   toggleSidebar();
                 }}
+                activeClassName="active"
               >
                 Home
-              </Link>
+              </NavLink>
             </li>
-            <li>
-              <Link
+            <li className='py-1'>
+              <NavLink
                 to={'/invoices'}
                 onClick={() => {
                   toggleMenu();
                   toggleSidebar();
                 }}
+                activeClassName="active"
               >
                 Invoices
-              </Link>
+              </NavLink>
             </li>
-            <li>
-              <Link
+            <li className='py-1'>
+              <NavLink
                 to={'/settings'}
                 onClick={() => {
                   toggleMenu();
                   toggleSidebar();
                 }}
+                activeClassName="active"
               >
                 Settings
-              </Link>
+              </NavLink>
             </li>
           </ul>
         </div>
@@ -172,27 +176,37 @@ const NavBar = ({ toggleDarkMode  }) => {
         <div className={`flex justify-between w-full ${showMenu ? '' : 'hidden'} md:flex`}>
           <ul className="flex gap-5 items-center">
             <li>
-              <Link to={'/'}>Home</Link>
+              <NavLink
+               to={'/'}
+               activeClassName="active"
+               >Home
+               </NavLink>
             </li>
             <li>
-              <Link to={'/invoices'}>Invoices</Link>
+              <NavLink
+               to={'/invoices'}
+               activeClassName="active"
+               >Invoices
+               </NavLink>
             </li>
             <li>
-              <Link to={'/settings'}>Settings</Link>
+              <NavLink
+               to={'/settings'}
+               activeClassName="active"
+               >Settings
+               </NavLink>
             </li>
           </ul>
           <div>
             <FormGroup>
               <FormControlLabel
                 control={<MaterialUISwitch checked={darkMode} onChange={handleDarkModeToggle} />}
-                // label={darkMode ? 'Dark Mode' : 'Light Mode'}
               />
             </FormGroup>
           </div>
         </div>
       </div>
     </div>
-    {/* <Outlet />   */}
     </>
   );
 };

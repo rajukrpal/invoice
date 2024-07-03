@@ -137,3 +137,8 @@
     color: var(--text-color-dark);
   }
 
+  .active {
+    font-weight: bold !important;
+    color: #1976d2 !important; 
+  }
+
