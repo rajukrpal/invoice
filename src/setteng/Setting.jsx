@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
@@ -100,16 +100,27 @@ const Setting = () => {
   const [showPicker, setShowPicker] = useState(false);
   const [showPicker2, setShowPicker2] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState("Template 1"); // State to keep track of selected template
-  const [autoSetDueDate, setAutoSetDueDate] = useState(false);
+  // const [autoSetDueDate, setAutoSetDueDate] = useState(false);
   const [numberOfDays, setNumberOfDays] = useState(0);
-  const [invoiceNo, setInvoiceNo] = useState("")
+  const [invoiceNo, setInvoiceNo] = useState("");
 
-  const handleCheckboxChange = (event) => {
-    setAutoSetDueDate(event.target.checked);
-    if (!event.target.checked) {
-      setNumberOfDays(0); // Reset number of days when checkbox is unchecked
-    }
-  };
+  // const handleCheckboxChange = (event) => {
+  //   setAutoSetDueDate(event.target.checked);
+  //   if (!event.target.checked) {
+  //     setNumberOfDays(0); // Reset number of days when checkbox is unchecked
+  //   }
+  // };
+
+  // const handleCheckboxChange = (e) => {
+  //   const isChecked = e.target.checked;
+  //   setAutoSetDueDate(isChecked); // Update the checkbox state
+
+  //   // Update localDefaultSetting with the new autoDueDate value
+  //   setLocalDefaultSetting(prevState => ({
+  //     ...prevState,
+  //     autoDueDate: isChecked,
+  //   }));
+  // };
 
   const handleNumberOfDaysChange = (event) => {
     setNumberOfDays(event.target.value);
@@ -149,16 +160,141 @@ const Setting = () => {
   };
 
   // 1111111111
-  const [isImageSelected, setIsImageSelected] = useState(true);
-  const [image, setImage] = useState(null);
+  const [localDefaultSetting, setLocalDefaultSetting] = useState({
+    image: null,
+    currency: "INR",
+    taxation: "GST",
+    taxationPer: 0,
+    discounts: 0,
+    shipping: 0,
+    invoiceNo: "Invoice No ",
+    autoDueDays: 0,
+    invoiceFrom: "",
+    termsAndConditions: "",
+    footNote: "",
+    autoDueDate:false,
+  });
+  const [isChecked, setIsChecked] = useState(localDefaultSetting.autoDueDate);
+  const [autoSetDueDate, setAutoSetDueDate] = useState(localDefaultSetting.autoDueDate);
 
-  const [currency, setCurrency] = useState("INR");
+
+  const [isImageSelected, setIsImageSelected] = useState(true);
+
+  // const [currency, setCurrency] = useState("INR");
   const [pageOrientation, setPageOrientation] = useState("portrait");
   const [pageSize, setPageSize] = useState("A4");
-  const [taxation, setTaxation] = useState("GST");
   const [isOpen, setIsOpen] = useState(false);
   const [isOpenTex, setIsOpenTex] = useState(false);
   const [checked, setChecked] = useState(false);
+
+   const handleCheckboxChange = () => {
+    const newChecked = !isChecked;
+    setIsChecked(newChecked);
+    setAutoSetDueDate(newChecked); // Update autoSetDueDate state
+    // Update localDefaultSetting with the new autoDueDate value
+    setLocalDefaultSetting(prevState => ({
+      ...prevState,
+      autoDueDate: newChecked,
+    }));
+  };
+
+  useEffect(() => {
+    const storedSettings = localStorage.getItem("defaultSettings");
+    if (storedSettings) {
+      // Parse the stored JSON string into an object
+      const parsedSettings = JSON.parse(storedSettings);
+      setLocalDefaultSetting(parsedSettings);
+      setIsChecked(parsedSettings.autoDueDate); 
+    }
+  }, []);
+
+  // Store updated settings to localStorage whenever localDefaultSetting changes
+  useEffect(() => {
+    localStorage.setItem(
+      "defaultSettings",
+      JSON.stringify(localDefaultSetting)
+    );
+  }, [localDefaultSetting]);
+
+
+  const handleSelectCurrency = (selectedCurrency) => {
+    setLocalDefaultSetting((prevSettings) => ({
+      ...prevSettings,
+      currency: selectedCurrency,
+    }));
+  };
+
+  const handleTaxationChange = (selectedTaxation) => {
+    setLocalDefaultSetting((prevSettings) => ({
+      ...prevSettings,
+      taxation: selectedTaxation,
+    }));
+  };
+
+  const handleTaxationPer = (selectedTaxationPer) => {
+    setLocalDefaultSetting((prevSettings) => ({
+      ...prevSettings,
+      taxationPer: selectedTaxationPer,
+    }));
+  };
+
+  const handleDiscounts = (selecteddiscounts) => {
+    setLocalDefaultSetting((prevSettings) => ({
+      ...prevSettings,
+      discounts: selecteddiscounts,
+    }));
+  };
+
+  const handleShipping = (selectedshipping) => {
+    setLocalDefaultSetting((prevSettings) => ({
+      ...prevSettings,
+      shipping: selectedshipping,
+    }));
+  };
+
+  const handleInvoiceNo = (selectedInvoiceNo) => {
+    setLocalDefaultSetting((prevSettings) => ({
+      ...prevSettings,
+      invoiceNo: selectedInvoiceNo,
+    }));
+  };
+
+  // const handleautoDueDays = (selectedautoDueDays) => {
+  //   setLocalDefaultSetting((prevSettings) => ({
+  //     ...prevSettings,
+  //     autoDueDays: selectedautoDueDays,
+  //   }));
+  // }; 
+
+  const handleautoDueDays = (value) => {
+    // Ensure value is a number
+    const autoDueDays = parseInt(value);
+    setLocalDefaultSetting(prevState => ({
+      ...prevState,
+      autoDueDays: isNaN(autoDueDays) ? 0 : autoDueDays, // Set autoDueDays to 0 if value is NaN
+    }));
+  };
+
+  const handleInvoiceFrom = (selectedinvoiceFrom) => {
+    setLocalDefaultSetting((prevSettings) => ({
+      ...prevSettings,
+      invoiceFrom: selectedinvoiceFrom,
+    }));
+  };
+
+  const handleTermsAndConditions = (selectedTermsAndConditions) => {
+    setLocalDefaultSetting((prevSettings) => ({
+      ...prevSettings,
+      termsAndConditions: selectedTermsAndConditions,
+    }));
+  };
+
+  const handleFoodNots = (selectedfootNote) => {
+    setLocalDefaultSetting((prevSettings) => ({
+      ...prevSettings,
+      footNote: selectedfootNote,
+    }));
+  };
 
   const handleChangeButton = () => {
     setChecked(!checked);
@@ -174,11 +310,6 @@ const Setting = () => {
     setIsOpenTex(!isOpenTex);
   };
 
-  const handleSelectCurrency = (value) => {
-    setCurrency(value);
-    setIsOpen(false);
-  };
-
   const handleSelectpageOrientation = (value) => {
     setPageOrientation(value);
     setIsOpen(false);
@@ -189,27 +320,24 @@ const Setting = () => {
     setIsOpenTex(false);
   };
 
-  const handleSelectTex = (value) => {
-    setTaxation(value);
-    setIsOpenTex(false);
-  };
 
   const handleRemoveImage = () => {
-    // setSelectedImage(null);
-    setImage(null);
-    setIsImageSelected(true);
-    // Clear file input (optional, if needed)
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
+    setLocalDefaultSetting((prevSettings) => ({
+      ...prevSettings,
+      image: null,
+    }));
+    setIsImageSelected(false);
   };
+
 
   const handleImageChange = (e) => {
     if (e.target.files && e.target.files[0]) {
       const reader = new FileReader();
       reader.onload = (e) => {
-        setImage(e.target.result);
-        // setSelectedImage(reader.result);
+        setLocalDefaultSetting((prevSettings) => ({
+          ...prevSettings,
+          image: e.target.result,
+        }));
         setIsImageSelected(true);
       };
       reader.readAsDataURL(e.target.files[0]);
@@ -219,7 +347,7 @@ const Setting = () => {
   const [selectedColor, setSelectedColor] = useState("#213F6B");
 
   const handleColorChange = (color) => {
-    setSelectedColor(color.hex); // Update state with selected color
+    setSelectedColor(color.hex);
   };
 
   return (
@@ -259,11 +387,11 @@ const Setting = () => {
                 <div className="md:grid grid-cols-12 px-4">
                   <div className="col-span-5 ">
                     <div className="p-2">
-                      {isImageSelected && image ? (
+                      {isImageSelected && localDefaultSetting.image ? (
                         <div>
                           <img
                             className="w-20 h-20"
-                            src={image}
+                            src={localDefaultSetting.image}
                             alt="Selected"
                           />
                           <button
@@ -298,14 +426,14 @@ const Setting = () => {
                             <span className="input-group-text">Currency</span>
                             <input
                               type="text"
-                              className="form-input pl-10 pr-4 py-2  w-full costom-dark-mod-input outline-none"
+                              className="form-input pl-10 pr-4 py-2 w-full costom-dark-mod-input outline-none"
                               aria-label="Sizing example input"
                               aria-describedby="inputGroup-sizing-default"
-                              value={currency}
+                              value={localDefaultSetting.currency}
                               readOnly
                               onClick={toggleMenu}
                             />
-                            <div className="absolute right-3 top-1/2 transform -translate-y-1/2 ">
+                            <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
                               <BsFillCaretDownFill
                                 className="cursor-pointer text-gray-500"
                                 onClick={toggleMenu}
@@ -313,12 +441,12 @@ const Setting = () => {
                             </div>
                           </div>
                           {isOpen && (
-                            <div className="absolute  w-full rounded-md bg-white ">
-                              <ul className="py-1">
+                            <div className="absolute z-20 w-full rounded-md bg-white shadow-lg">
+                              <ul className="rounded">
                                 {currencies.map((option) => (
                                   <li
                                     key={option.value}
-                                    className="px-3 py-2 cursor-pointer hover:bg-gray-100 hover:text-black costom-dark-mod-input "
+                                    className="px-3 py-2 cursor-pointer hover:bg-gray-100 hover:text-black costom-dark-mod-input"
                                     onClick={() =>
                                       handleSelectCurrency(option.value)
                                     }
@@ -340,7 +468,7 @@ const Setting = () => {
                               className="form-input pl-10 pr-4 py-2  w-full outline-none costom-dark-mod-input"
                               aria-label="Sizing example input"
                               aria-describedby="inputGroup-sizing-default"
-                              value={taxation}
+                              value={localDefaultSetting.taxation}
                               readOnly
                               onClick={toggleMenuTex}
                             />
@@ -359,7 +487,7 @@ const Setting = () => {
                                     key={option.value}
                                     className="px-3 py-2 cursor-pointer hover:bg-gray-100 hover:text-black"
                                     onClick={() =>
-                                      handleSelectTex(option.value)
+                                      handleTaxationChange(option.value)
                                     }
                                   >
                                     {option.label}
@@ -384,8 +512,10 @@ const Setting = () => {
                               </label>
                               <input
                                 type="number"
-                                value={taxationPercentageGst}
-                                onChange={handleInputChangeGst}
+                                value={localDefaultSetting.taxationPer}
+                                onChange={(e) =>
+                                  handleTaxationPer(e.target.value)
+                                }
                                 className="form-input flex-1 costom-dark-mod-input"
                                 placeholder="Taxation Percentage"
                                 id="taxationPer"
@@ -402,8 +532,10 @@ const Setting = () => {
                               </label>
                               <input
                                 type="number"
-                                value={taxationPercentageDescount}
-                                onChange={handleInputChangeDescount}
+                                value={localDefaultSetting.discounts}
+                                onChange={(e) =>
+                                  handleDiscounts(e.target.value)
+                                }
                                 className="form-input flex-1 px-3 costom-dark-mod-input"
                                 placeholder="Discounts"
                                 id="discounts"
@@ -420,8 +552,8 @@ const Setting = () => {
                               </label>
                               <input
                                 type="number"
-                                value={taxationPercentageShipping}
-                                onChange={handleInputChangeShipping}
+                                value={localDefaultSetting.shipping}
+                                onChange={(e) => handleShipping(e.target.value)}
                                 className="form-input w-full flex-1 px-3 costom-dark-mod-input"
                                 placeholder="Shipping"
                                 id="shipping"
@@ -443,8 +575,10 @@ const Setting = () => {
                                 className="form-input flex-1 px-3 costom-dark-mod-input"
                                 placeholder="Invoice No:"
                                 id="invoiceNo"
-                                value={invoiceNo}
-                                onChange={(e)=>setInvoiceNo(e.target.value)}
+                                value={localDefaultSetting.invoiceNo}
+                                onChange={(e) =>
+                                  handleInvoiceNo(e.target.value)
+                                }
                               />
                             </div>
                             <div>
@@ -468,7 +602,7 @@ const Setting = () => {
                                 type="checkbox"
                                 id="AutoSetDueDate"
                                 className="form-checkbox h-5 w-5 text-indigo-600"
-                                checked={autoSetDueDate}
+                                checked={isChecked}
                                 onChange={handleCheckboxChange}
                               />
                               <label htmlFor="AutoSetDueDate" className="ml-2">
@@ -489,8 +623,10 @@ const Setting = () => {
                                   type="number"
                                   className="form-input flex-1 px-2 py-1 ml-2 md:ml-0 bg-slate-200 costom-dark-mod-input col-span-6"
                                   min="0"
-                                  value={numberOfDays}
-                                  onChange={handleNumberOfDaysChange}
+                                  value={localDefaultSetting.autoDueDays}
+                                  onChange={(e) =>
+                                    handleautoDueDays(e.target.value)
+                                  }
                                   disabled={!autoSetDueDate}
                                 />
                                 <span className="px-2 py-1 bg-gray-200 text-gray-700 ml-2 md:ml-0 costom-dark-mod-input col-span-3">
@@ -521,8 +657,8 @@ const Setting = () => {
                       <p>Invoice from</p>
                       <div>
                         <textarea
-                          // value={invoiceFrom}
-                          // onChange={(e) => setInvoicefrom(e.target.value)}
+                          value={localDefaultSetting.invoiceFrom}
+                          onChange={(e) => handleInvoiceFrom(e.target.value)}
                           placeholder="Who is this invoice from?"
                           className="w-full border outline-none h-24 p-2 rounded-lg costom-dark-mod-input"
                           name=""
@@ -536,8 +672,10 @@ const Setting = () => {
                       <p>Terms & Conditions</p>
                       <div>
                         <textarea
-                          // value={invoiceFrom}
-                          // onChange={(e) => setInvoicefrom(e.target.value)}
+                          value={localDefaultSetting.termsAndConditions}
+                          onChange={(e) =>
+                            handleTermsAndConditions(e.target.value)
+                          }
                           placeholder="Terms and conditions - late fees, payment methods, delivery schedule"
                           className="w-full border outline-none h-24 p-2 rounded-lg costom-dark-mod-input"
                           name=""
@@ -551,8 +689,8 @@ const Setting = () => {
                       <p>Foot Note</p>
                       <div>
                         <textarea
-                          // value={invoiceFrom}
-                          // onChange={(e) => setInvoicefrom(e.target.value)}
+                          value={localDefaultSetting.footNote}
+                          onChange={(e) => handleFoodNots(e.target.value)}
                           placeholder="Thank you for your business"
                           className="w-full border outline-none h-24 p-2 rounded-lg costom-dark-mod-input"
                           name=""

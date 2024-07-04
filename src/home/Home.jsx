@@ -28,9 +28,13 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase/firebase";
 import { useLocation } from "react-router-dom";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 
 
 const Home = ({ darkMode, toggleDarkMode }) => {
+
   const location = useLocation()
   const {
     invoice: initialInvoice,
@@ -47,6 +51,94 @@ const Home = ({ darkMode, toggleDarkMode }) => {
     dueDate:initialDueDate,
     invoiceDate:initialInvoiceDate,
   }  = location.state || {};
+  console.log("location.state",location.state)
+
+//---------------------------------------------------
+
+// const getDefaltSettingValue = localStorage.getItem("defaultSettings");
+// console.log("getDefaltSettingValue",getDefaltSettingValue)
+
+// const parsedSettings = JSON.parse(getDefaltSettingValue);
+// console.log("testing", parsedSettings.taxation);
+
+
+
+
+
+
+const [image,setImage] = useState(initialImage || null)
+const [taxation, setTaxation] = useState("GST");
+const [currency,setCurrency] = useState("INR");
+const [invoiceNo,setinvoiceNo] = useState("Invoice No ");
+const [invoiceFrom,setInvoiceFrom] = useState(initialInvoiceFrom || "")
+const [termsAndConditions,setTermsAndConditions] = useState(initialTermsAndConditions || "")
+const [footNote,setFootNote] = useState(initialFootNote || "")
+const [discounts,setDiscounts] = useState(initialDiscounts || 0)
+const [shipping,setShipping] = useState(initialShipping || 0)
+const [autoDueDays,setAutoDueDays] = useState(0)
+const [autoDueDate,setAutoDueDate] = useState("")
+const [taxationPer,setTaxationPer] = useState(0)
+console.log("taxationPer",taxationPer)
+
+
+
+useEffect(() => {
+  const getDefaltSettingValue = localStorage.getItem("defaultSettings");
+  console.log("getDefaltSettingValue", getDefaltSettingValue);
+
+  if (getDefaltSettingValue) {
+    const parsedSettings = JSON.parse(getDefaltSettingValue);
+    console.log("parsedSettings", parsedSettings);
+
+    // Update taxation state with the parsed value
+    // setImage(parsedSettings.image)
+    setTaxation(parsedSettings.taxation);
+    setCurrency(parsedSettings.currency);
+    setinvoiceNo(parsedSettings.invoiceNo);
+    // setInvoiceFrom(parsedSettings.invoiceFrom)
+    // setTermsAndConditions(parsedSettings.termsAndConditions)
+    // setFootNote(parsedSettings.footNote)
+    // setDiscounts(parsedSettings.discounts)
+    // setShipping(parsedSettings.shipping)
+    setAutoDueDays(parsedSettings.autoDueDays)
+    setAutoDueDate(parsedSettings.autoDueDate)
+    setTaxationPer(parsedSettings.taxationPer)
+
+    if (!initialInvoiceFrom) {
+      setInvoiceFrom(parsedSettings.invoiceFrom);
+    }
+
+    if (!initialTermsAndConditions) {
+      setTermsAndConditions(parsedSettings.termsAndConditions);
+    }
+
+    if (!initialFootNote) {
+      setFootNote(parsedSettings.footNote);
+    }
+
+    if (!initialDiscounts) {
+      setDiscounts(parsedSettings.discounts);
+    }
+
+    if (!initialShipping) {
+      setShipping(parsedSettings.shipping);
+    }
+
+    if (!initialImage) {
+      setImage(parsedSettings.image);
+    }
+
+  }
+}, []);
+
+
+//---------------------------------------------------            
+
+
+
+
+
+ 
   const fileInputRef = useRef(null);
   const [isImageSelected, setIsImageSelected] = useState(true);
   const [invoice, setInvoice] = useState( initialInvoice || "Invoice No: ");
@@ -69,14 +161,28 @@ const Home = ({ darkMode, toggleDarkMode }) => {
   : '';
 
 
-  const [invoiceFrom, setInvoicefrom] = useState( initialInvoiceFrom || "");
+
+  useEffect(() => {
+    if (autoDueDate) {
+      const currentDate = new Date();
+      currentDate.setDate(currentDate.getDate() + autoDueDays);
+      setDueDat(currentDate);
+    }
+  }, [autoDueDate, autoDueDays]);
+
+
+
+
+
+
+  // const [invoiceFrom, setInvoicefrom] = useState( initialInvoiceFrom || "");
   const [invoiceTo, setInvoiceTo] = useState( initialInvoiceTo || "");
   const [itemValue, setItemValue] = useState(initialItemValue || 0);
-  const [discounts, setDiscounts] = useState(initialDiscounts || 0);
-  const [shipping, setShipping] = useState(initialShipping || 0);
-  const [termsAndConditions, setTermsAndConditions] = useState( initialTermsAndConditions|| "");
-  const [footNote, setFootNote] = useState(initialFootNote || "");
-  const [image, setImage] = useState(initialImage || null);
+  // const [discounts, setDiscounts] = useState(initialDiscounts || 0);
+  // const [shipping, setShipping] = useState(initialShipping || 0);
+  // const [termsAndConditions, setTermsAndConditions] = useState( initialTermsAndConditions|| "");
+  // const [footNote, setFootNote] = useState(initialFootNote || "");
+  // const [image, setImage] = useState(initialImage || null);
   const [rows, setRows] = useState( initialRows || [
      {
       id: 1,
@@ -128,6 +234,8 @@ const [saveInvoiceGetFirebase ,setSaveInvoiceGetFirebase] = useState([])
   
         // Update local state with current invoice
         setCurrentInvoice(newInvoice);
+        toast.success("Update Invoice  successfully");
+  
   
         // Update list of saved invoices (if necessary)
         setSaveInvoiceGetFirebase((prevInvoices) => {
@@ -140,7 +248,9 @@ const [saveInvoiceGetFirebase ,setSaveInvoiceGetFirebase] = useState([])
         // Add new invoice to Firestore
         const docRef = await addDoc(collection(db, "invoices"), {
           ...newInvoice,
+          
         });
+        toast.success("New Invoice Generated successfully");
   
         // Update local state with current invoice and ID
         const invoiceWithId = {
@@ -260,7 +370,9 @@ const [saveInvoiceGetFirebase ,setSaveInvoiceGetFirebase] = useState([])
       // Update saveInvoice state to remove the deleted invoice
       setSaveInvoiceGetFirebase((prevInvoices) =>
         prevInvoices.filter((invoice) => invoice.uid !== invoiceId)
+      
       );
+      toast.success("Delete Invoice SuccessFully!")
     } catch (error) {
       console.error("Error deleting invoice: ", error);
     }
@@ -277,7 +389,7 @@ const [saveInvoiceGetFirebase ,setSaveInvoiceGetFirebase] = useState([])
     setInvoice("Invoice No: ");
     setInvoiceDate(new Date());
     setDueDat("");
-    setInvoicefrom("");
+    setInvoiceFrom("");
     setInvoiceTo("");
     setTermsAndConditions("");
     setFootNote("");
@@ -401,17 +513,18 @@ const [saveInvoiceGetFirebase ,setSaveInvoiceGetFirebase] = useState([])
 
   // remove image
   const handleRemoveImage = () => {
-    // setSelectedImage(null);
-    setImage(null);
-    setIsImageSelected(true);
-    // Clear file input (optional, if needed)
+    setImage(null); // Sets image state to null, effectively removing the selected image
+    setIsImageSelected(true); // Updates isImageSelected state to true
+    // Optional: Clear file input if needed
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
   };
+  
 
   const handleInvoiceChange = (e) => {
-    setInvoice(e.target.value);
+    // setInvoice(e.target.value);
+    setinvoiceNo(e.target.value);
     // console.log("invoice text", invoice);
   };
 
@@ -456,6 +569,7 @@ const [saveInvoiceGetFirebase ,setSaveInvoiceGetFirebase] = useState([])
 
   const handleDownloadPdfFirst = () => {
     // Create a container div for the bill content
+    toast.success("Download Invoice SuccessFully!")
     const container = document.createElement("div");
     container.className = "bg-white p-4";
     container.style.position = "absolute";
@@ -582,7 +696,7 @@ const [saveInvoiceGetFirebase ,setSaveInvoiceGetFirebase] = useState([])
   };
 
   const handleDownloadPdf = (item) => {
-    console.log("item", item);
+    toast.success("Download Invoice SuccessFully!")
     // Create a container div for the bill content
     const container = document.createElement("div");
     container.className = "bg-white p-4";
@@ -1295,13 +1409,13 @@ const [saveInvoiceGetFirebase ,setSaveInvoiceGetFirebase] = useState([])
     if (e.target.files && e.target.files[0]) {
       const reader = new FileReader();
       reader.onload = (e) => {
-        setImage(e.target.result);
-        // setSelectedImage(reader.result);
-        setIsImageSelected(true);
+        setImage(e.target.result); // Sets the image state to the uploaded image data URL
+        setIsImageSelected(true); // Updates isImageSelected state to true
       };
-      reader.readAsDataURL(e.target.files[0]);
+      reader.readAsDataURL(e.target.files[0]); // Reads the uploaded file as a data URL
     }
   };
+  
 
   const handalAllItemValue = (item) =>{
     setInvoice(item.invoice || '');
@@ -1322,7 +1436,7 @@ const [saveInvoiceGetFirebase ,setSaveInvoiceGetFirebase] = useState([])
     }
     setIsImageSelected(true)
     setImage(item.image || '');
-    setInvoicefrom(item.invoiceFrom || '')
+    setInvoiceFrom(item.invoiceFrom || '')
     setInvoiceTo(item.invoiceTo || '')
     setDiscounts(item.discounts)
     setFootNote(item.footNote || '')
@@ -1334,6 +1448,7 @@ const [saveInvoiceGetFirebase ,setSaveInvoiceGetFirebase] = useState([])
   const isSmallScreen = useMediaQuery("(max-width:767px)");
   return (
     <>
+     <ToastContainer position="top-center" />
       <NavBar  darkMode={darkMode} toggleDarkMode={toggleDarkMode}  />
       <div className="px-2 costom-dark-mod">
         <div className="lg:grid grid-cols-12  ">
@@ -1384,7 +1499,7 @@ const [saveInvoiceGetFirebase ,setSaveInvoiceGetFirebase] = useState([])
                         type="text"
                         className="border border-gray-300 p-2  w-[50%] rounded-l-lg costom-dark-mod-input"
                         placeholder="Invoice"
-                        value={invoice}
+                        value={invoiceNo}
                         onChange={handleInvoiceChange}
                         aria-label="Username"
                       />
@@ -1485,8 +1600,10 @@ const [saveInvoiceGetFirebase ,setSaveInvoiceGetFirebase] = useState([])
                 <p>Invoice from</p>
                 <div>
                   <textarea
+                    // value={invoiceFrom}
                     value={invoiceFrom}
-                    onChange={(e) => setInvoicefrom(e.target.value)}
+
+                    onChange={(e) => setInvoiceFrom(e.target.value)}
                     placeholder="Who is this invoice from? (reQuired)"
                     className="w-full border outline-none h-24 p-2 rounded-lg costom-dark-mod-input"
                     name=""
@@ -1517,9 +1634,9 @@ const [saveInvoiceGetFirebase ,setSaveInvoiceGetFirebase] = useState([])
                       <th className="w-full md:w-1/12 p-1"> # </th>
                       <th className="md:w-2/12 p-1"> Item </th>
                       <th className="md:w-1/12 p-1"> Quantity </th>
-                      <th className="md:w-1/12 p-1"> Rate (INR) </th>
-                      <th className="md:w-1/12 p-1"> GST </th>
-                      <th className="md:w-2/12 p-1"> Amount (INR) </th>
+                      <th className="md:w-1/12 p-1"> Rate ({currency}) </th>
+                      <th className="md:w-1/12 p-1"> {taxation} </th>
+                      <th className="md:w-2/12 p-1"> Amount ({currency}) </th>
                     </tr>
                   </thead>
 
@@ -1659,6 +1776,7 @@ const [saveInvoiceGetFirebase ,setSaveInvoiceGetFirebase] = useState([])
                   <div className="col-span-9">
                     <input
                       value={discounts}
+                     
                       onChange={handleDiscountChange}
                       className="w-full p-1 px-2 rounded border outline-none costom-dark-mod-input "
                       type="number"
