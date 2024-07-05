@@ -7,7 +7,8 @@ import NavBar from "../navBar/NavBar";
 import { GrDownload } from "react-icons/gr";
 import { BsFillCaretDownFill } from "react-icons/bs";
 import { SketchPicker } from "react-color";
-import Switch from "@mui/material/Switch";
+// import Switch from "@mui/material/Switch";
+import { Switch } from "antd";
 import { Link } from "react-router-dom";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
@@ -84,71 +85,13 @@ function a11yProps(index) {
 }
 
 const Setting = () => {
-  const fileInputRef = useRef(null);
   const [value, setValue] = useState(0);
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
 
-  const [color, setColor] = useState("#000");
-  const [color2, setColor2] = useState("#FFFFFF");
-  const [taxationPercentageGst, setTaxationPercentageGst] = useState("");
-  const [taxationPercentageDescount, setTaxationPercentageDescount] =
-    useState("");
-  const [taxationPercentageShipping, setTaxationPercentageShipping] =
-    useState("");
   const [showPicker, setShowPicker] = useState(false);
   const [showPicker2, setShowPicker2] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState("Template 1"); // State to keep track of selected template
-  // const [autoSetDueDate, setAutoSetDueDate] = useState(false);
-  const [numberOfDays, setNumberOfDays] = useState(0);
-  const [invoiceNo, setInvoiceNo] = useState("");
-
-  // const handleCheckboxChange = (event) => {
-  //   setAutoSetDueDate(event.target.checked);
-  //   if (!event.target.checked) {
-  //     setNumberOfDays(0); // Reset number of days when checkbox is unchecked
-  //   }
-  // };
-
-  // const handleCheckboxChange = (e) => {
-  //   const isChecked = e.target.checked;
-  //   setAutoSetDueDate(isChecked); // Update the checkbox state
-
-  //   // Update localDefaultSetting with the new autoDueDate value
-  //   setLocalDefaultSetting(prevState => ({
-  //     ...prevState,
-  //     autoDueDate: isChecked,
-  //   }));
-  // };
-
-  const handleNumberOfDaysChange = (event) => {
-    setNumberOfDays(event.target.value);
-  };
-
-  const handleTemplateSelect = (templateName) => {
-    setSelectedTemplate(templateName); // Update the selected template state
-  };
-
-  const handleInputChangeGst = (event) => {
-    setTaxationPercentageGst(event.target.value);
-  };
-  const handleInputChangeDescount = (event) => {
-    setTaxationPercentageDescount(event.target.value);
-  };
-  const handleInputChangeShipping = (event) => {
-    setTaxationPercentageShipping(event.target.value);
-  };
-
-  const handleColorChangeinput = (newColor) => {
-    setColor(newColor.hex);
-    // setShowPicker(false)
-  };
-
-  const handleColorChangeinput2 = (newColor) => {
-    setColor2(newColor.hex);
-    // setShowPicker(false)
-  };
 
   // Toggle color picker visibility
   const togglePickerinput = () => {
@@ -159,7 +102,6 @@ const Setting = () => {
     setShowPicker2(!showPicker2);
   };
 
-  // 1111111111
   const [localDefaultSetting, setLocalDefaultSetting] = useState({
     image: null,
     currency: "INR",
@@ -172,43 +114,91 @@ const Setting = () => {
     invoiceFrom: "",
     termsAndConditions: "",
     footNote: "",
-    autoDueDate:false,
+    autoDueDate: false,
+    defaultTemplate: "Template 1",
   });
+
+  const [selectedTemplate, setSelectedTemplate] = useState(
+    localDefaultSetting.defaultTemplate
+  );
+
+  const handleTemplateSelect = (templateName) => {
+    setSelectedTemplate(templateName); // Update selected template state
+    setLocalDefaultSetting((prevSettings) => ({
+      ...prevSettings,
+      defaultTemplate: templateName, // Update default template in local state
+    }));
+  };
+
+  useEffect(() => {
+    setSelectedTemplate(localDefaultSetting.defaultTemplate);
+  }, [localDefaultSetting.defaultTemplate]);
+
+  const [localDocDefinition, setLocalDocDefinition] = useState({
+    backgroundColor: "#0069D9",
+    pageOrientation: "portrait",
+    pageSize: "A4",
+    watermark: {
+      text: "",
+      opacity: 0.3,
+      bold: false,
+      italics: false,
+    },
+    qrCodeActive: false,
+    qrCode: {
+      text: "",
+      foreground: "#000000",
+      background: "#FFFFFF",
+      version: 1,
+      eccLevel: "L",
+      appendInvoiceNo: false,
+    },
+  });
+
+
+  const [color, setColor] = useState("");
   const [isChecked, setIsChecked] = useState(localDefaultSetting.autoDueDate);
-  const [autoSetDueDate, setAutoSetDueDate] = useState(localDefaultSetting.autoDueDate);
-
-
+  const [autoSetDueDate, setAutoSetDueDate] = useState(
+    localDefaultSetting.autoDueDate
+  );
   const [isImageSelected, setIsImageSelected] = useState(true);
-
-  // const [currency, setCurrency] = useState("INR");
-  const [pageOrientation, setPageOrientation] = useState("portrait");
-  const [pageSize, setPageSize] = useState("A4");
   const [isOpen, setIsOpen] = useState(false);
   const [isOpenTex, setIsOpenTex] = useState(false);
-  const [checked, setChecked] = useState(false);
+  // const [checked, setChecked] = useState(false);
 
-   const handleCheckboxChange = () => {
+  const handleCheckboxChange = () => {
     const newChecked = !isChecked;
     setIsChecked(newChecked);
     setAutoSetDueDate(newChecked); // Update autoSetDueDate state
     // Update localDefaultSetting with the new autoDueDate value
-    setLocalDefaultSetting(prevState => ({
+    setLocalDefaultSetting((prevState) => ({
       ...prevState,
       autoDueDate: newChecked,
     }));
   };
 
+  // defaultSettings
   useEffect(() => {
     const storedSettings = localStorage.getItem("defaultSettings");
     if (storedSettings) {
       // Parse the stored JSON string into an object
       const parsedSettings = JSON.parse(storedSettings);
       setLocalDefaultSetting(parsedSettings);
-      setIsChecked(parsedSettings.autoDueDate); 
+      setIsChecked(parsedSettings.autoDueDate);
     }
   }, []);
 
-  // Store updated settings to localStorage whenever localDefaultSetting changes
+  // docDefinition
+  useEffect(() => {
+    const storedSettings = localStorage.getItem("docDefinition");
+    if (storedSettings) {
+      const parsedDocSettings = JSON.parse(storedSettings);
+      setLocalDocDefinition(parsedDocSettings);
+    }
+    console.log("raju");
+  }, []);
+
+  // defaultSettings
   useEffect(() => {
     localStorage.setItem(
       "defaultSettings",
@@ -216,12 +206,17 @@ const Setting = () => {
     );
   }, [localDefaultSetting]);
 
+  // docDefinition
+  useEffect(() => {
+    localStorage.setItem("docDefinition", JSON.stringify(localDocDefinition));
+  }, [localDocDefinition]);
 
   const handleSelectCurrency = (selectedCurrency) => {
     setLocalDefaultSetting((prevSettings) => ({
       ...prevSettings,
       currency: selectedCurrency,
     }));
+    setIsOpen(false);
   };
 
   const handleTaxationChange = (selectedTaxation) => {
@@ -229,6 +224,7 @@ const Setting = () => {
       ...prevSettings,
       taxation: selectedTaxation,
     }));
+    setIsOpenTex(false);
   };
 
   const handleTaxationPer = (selectedTaxationPer) => {
@@ -259,17 +255,10 @@ const Setting = () => {
     }));
   };
 
-  // const handleautoDueDays = (selectedautoDueDays) => {
-  //   setLocalDefaultSetting((prevSettings) => ({
-  //     ...prevSettings,
-  //     autoDueDays: selectedautoDueDays,
-  //   }));
-  // }; 
-
   const handleautoDueDays = (value) => {
     // Ensure value is a number
     const autoDueDays = parseInt(value);
-    setLocalDefaultSetting(prevState => ({
+    setLocalDefaultSetting((prevState) => ({
       ...prevState,
       autoDueDays: isNaN(autoDueDays) ? 0 : autoDueDays, // Set autoDueDays to 0 if value is NaN
     }));
@@ -296,11 +285,7 @@ const Setting = () => {
     }));
   };
 
-  const handleChangeButton = () => {
-    setChecked(!checked);
-  };
-
-  const label = { inputProps: { "aria-label": "Switch demo" } };
+  // const label = { inputProps: { "aria-label": "Switch demo" } };
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -310,16 +295,140 @@ const Setting = () => {
     setIsOpenTex(!isOpenTex);
   };
 
-  const handleSelectpageOrientation = (value) => {
-    setPageOrientation(value);
+  // _________________________________________________doc______________________________________
+
+  const handleColorChange = (color) => {
+    setLocalDocDefinition((prevSettings) => ({
+      ...prevSettings,
+      backgroundColor: color.hex,
+    }));
+  };
+
+  const handleSelectpageOrientation = (selectedpageOrientation) => {
+    setLocalDocDefinition((prevSettings) => ({
+      ...prevSettings,
+      pageOrientation: selectedpageOrientation,
+    }));
     setIsOpen(false);
   };
 
-  const handleSelectpageSize = (value) => {
-    setPageSize(value);
+  const handleSelectpageSize = (selectedpageSize) => {
+    setLocalDocDefinition((prevSettings) => ({
+      ...prevSettings,
+      pageSize: selectedpageSize,
+    }));
     setIsOpenTex(false);
   };
 
+  const handleChangeText = (event) => {
+    const newText = event.target.value;
+    setLocalDocDefinition((prevSettings) => ({
+      ...prevSettings,
+      watermark: {
+        ...prevSettings.watermark,
+        text: newText,
+      },
+    }));
+  };
+
+  const handalOpacityChange = (event) => {
+    const newOpecity = event.target.value;
+    setLocalDocDefinition((prevSettings) => ({
+      ...prevSettings,
+      watermark: {
+        ...prevSettings.watermark,
+        opacity: newOpecity,
+      },
+    }));
+  };
+
+  const handleCheckboxChangebold = (event) => {
+    const { id, checked } = event.target;
+    if (id === "boldCheckbox") {
+      setLocalDocDefinition((prevSettings) => ({
+        ...prevSettings,
+        watermark: {
+          ...prevSettings.watermark,
+          bold: checked,
+        },
+      }));
+    } else if (id === "italicCheckbox") {
+      setLocalDocDefinition((prevSettings) => ({
+        ...prevSettings,
+        watermark: {
+          ...prevSettings.watermark,
+          italics: checked,
+        },
+      }));
+    }
+  };
+
+  const handleSwitchChange = (checked) => {
+    setLocalDocDefinition((prevSettings) => ({
+      ...prevSettings,
+      qrCodeActive: checked,
+    }));
+  };
+
+  const handleChangeTextQr = (event) => {
+    const newText = event.target.value;
+    setLocalDocDefinition((prevSettings) => ({
+      ...prevSettings,
+      qrCode: {
+        ...prevSettings.qrCode,
+        text: newText,
+      },
+    }));
+  };
+
+  const handleAppendInvoiceNo = () => {
+    setLocalDocDefinition((prevSettings) => ({
+      ...prevSettings,
+      qrCode: {
+        ...prevSettings.qrCode,
+        appendInvoiceNo: !prevSettings.qrCode.appendInvoiceNo,
+      },
+    }));
+  };
+
+  const handleChangeButtonAppendInvoiceNo = (event) => {
+    // Prevents the default action of the label click (if any)
+    event.preventDefault();
+    handleAppendInvoiceNo();
+  };
+
+  const handleColorChangeinput = (newColor) => {
+    setColor(newColor.hex);
+    setLocalDocDefinition((prevSettings) => ({
+      ...prevSettings,
+      qrCode: {
+        ...prevSettings.qrCode,
+        foreground: newColor.hex,
+      },
+    }));
+  };
+
+  const handleColorChangeinput2 = (newColor) => {
+    setColor(newColor.hex);
+    setLocalDocDefinition((prevSettings) => ({
+      ...prevSettings,
+      qrCode: {
+        ...prevSettings.qrCode,
+        background: newColor.hex,
+      },
+    }));
+  };
+
+  const handleEccLevelChange = (event) => {
+    const newEccLevel = event.target.value;
+    setLocalDocDefinition((prevSettings) => ({
+      ...prevSettings,
+      qrCode: {
+        ...prevSettings.qrCode,
+        eccLevel: newEccLevel,
+      },
+    }));
+  };
 
   const handleRemoveImage = () => {
     setLocalDefaultSetting((prevSettings) => ({
@@ -328,7 +437,6 @@ const Setting = () => {
     }));
     setIsImageSelected(false);
   };
-
 
   const handleImageChange = (e) => {
     if (e.target.files && e.target.files[0]) {
@@ -344,11 +452,7 @@ const Setting = () => {
     }
   };
 
-  const [selectedColor, setSelectedColor] = useState("#213F6B");
-
-  const handleColorChange = (color) => {
-    setSelectedColor(color.hex);
-  };
+  // ___________________________________________________________________trmplet_____________________________________
 
   return (
     <>
@@ -480,12 +584,12 @@ const Setting = () => {
                             </div>
                           </div>
                           {isOpenTex && (
-                            <div className="absolute mt-1 w-full rounded-md bg-white shadow-lg costom-dark-mod-input">
-                              <ul className="py-1">
+                            <div className="z-20 absolute mt-1 w-full rounded-md bg-white shadow-lg costom-dark-mod-input">
+                              <ul className="py-1 ">
                                 {Taxations.map((option) => (
                                   <li
                                     key={option.value}
-                                    className="px-3 py-2 cursor-pointer hover:bg-gray-100 hover:text-black"
+                                    className="px-3  py-2 cursor-pointer hover:bg-gray-100 hover:text-black"
                                     onClick={() =>
                                       handleTaxationChange(option.value)
                                     }
@@ -711,7 +815,7 @@ const Setting = () => {
                     <div>
                       <p className="py-2">Background Color</p>
                       <SketchPicker
-                        color={selectedColor}
+                        color={localDocDefinition.backgroundColor}
                         onChange={handleColorChange}
                       />
                     </div>
@@ -719,7 +823,9 @@ const Setting = () => {
                       <p>Selected Color:</p>
                       <div
                         className="w-12 h-12 rounded-md border border-gray-300"
-                        style={{ backgroundColor: selectedColor }}
+                        style={{
+                          backgroundColor: localDocDefinition.backgroundColor,
+                        }}
                       ></div>
                     </div>
                   </div>
@@ -737,7 +843,8 @@ const Setting = () => {
                                 className="form-input pl-10 pr-4 py-2  w-full costom-dark-mod-input"
                                 aria-label="Sizing example input"
                                 aria-describedby="inputGroup-sizing-default"
-                                value={pageOrientation}
+                                // value={pageOrientation}
+                                value={localDocDefinition.pageOrientation}
                                 readOnly
                                 onClick={toggleMenu}
                               />
@@ -780,7 +887,7 @@ const Setting = () => {
                                 className="form-input pl-10 pr-4 py-2  w-full costom-dark-mod-input"
                                 aria-label="Sizing example input"
                                 aria-describedby="inputGroup-sizing-default"
-                                value={pageSize}
+                                value={localDocDefinition.pageSize}
                                 readOnly
                                 onClick={toggleMenuTex}
                               />
@@ -826,9 +933,11 @@ const Setting = () => {
                                 className="flex-shrink-0 px-3 py-2 bg-gray-200 text-gray-700 costom-dark-mod"
                                 id="inputGroup-sizing-default"
                               >
-                                Default
+                                Text
                               </span>
                               <input
+                                value={localDocDefinition.watermark.text}
+                                onChange={handleChangeText}
                                 type="text"
                                 className="flex-grow px-3 w-full py-2 rounded-r-md border border-gray-300 focus:outline-none focus:border-blue-500 costom-dark-mod-input"
                                 aria-label="Sizing example input"
@@ -844,7 +953,9 @@ const Setting = () => {
                               </span>
 
                               <input
-                                type="text"
+                                type="number"
+                                value={localDocDefinition.watermark.opacity}
+                                onChange={handalOpacityChange}
                                 className="flex-grow px-3 py-2 border border-gray-300 focus:outline-none focus:border-blue-500 costom-dark-mod-input costom-dark-mod-input"
                                 aria-label="Sizing example input"
                                 aria-describedby="inputGroup-sizing-default"
@@ -854,6 +965,8 @@ const Setting = () => {
                                   type="checkbox"
                                   id="boldCheckbox"
                                   className="mr-2"
+                                  checked={localDocDefinition.watermark.bold}
+                                  onChange={handleCheckboxChangebold}
                                 />
                                 <label htmlFor="boldCheckbox">Bold</label>
                               </div>
@@ -863,6 +976,8 @@ const Setting = () => {
                                   type="checkbox"
                                   id="italicCheckbox"
                                   className="mr-2"
+                                  checked={localDocDefinition.watermark.italics}
+                                  onChange={handleCheckboxChangebold}
                                 />
                                 <label htmlFor="italicCheckbox">Italic</label>
                               </div>
@@ -879,7 +994,10 @@ const Setting = () => {
                             QR Code
                           </div>
                           <div>
-                            <Switch {...label} />
+                            <Switch
+                              checked={localDocDefinition.qrCodeActive}
+                              onChange={handleSwitchChange}
+                            />
                           </div>
                           <div>Active</div>
                         </div>
@@ -889,11 +1007,13 @@ const Setting = () => {
                         <div className="px-2 py-2">
                           <div className="mb-3 sm:flex w-full items-center">
                             <span className="flex-shrink-0 px-3 py-2 bg-gray-200 text-gray-700 rounded-l-md costom-dark-mod">
-                              Test
+                              Text
                             </span>
 
                             <input
                               type="text"
+                              value={localDocDefinition.qrCode.text}
+                              onChange={handleChangeTextQr}
                               className="flex-grow px-3 py-2 border border-gray-300 focus:outline-none focus:border-blue-500 costom-dark-mod-input"
                               aria-label="Sizing example input"
                               aria-describedby="inputGroup-sizing-default"
@@ -901,15 +1021,14 @@ const Setting = () => {
 
                             <div className=" p-1 flex items-center ">
                               <Switch
-                                checked={checked}
-                                onChange={handleChangeButton}
-                                inputProps={{
-                                  "aria-label": "Append Invoice No",
-                                }}
+                                checked={
+                                  localDocDefinition.qrCode.appendInvoiceNo
+                                }
+                                onChange={handleAppendInvoiceNo}
                               />
                               <label
-                                htmlFor="appendInvoiceNo"
-                                onClick={handleChangeButton}
+                                htmlFor="appendInvoiceNo  "
+                                onClick={handleChangeButtonAppendInvoiceNo}
                                 className="cursor-pointer"
                               >
                                 Append Invoice No
@@ -941,29 +1060,23 @@ const Setting = () => {
                           <div className="relative">
                             {/* Color Picker for Text/Foreground Color */}
                             <div
-                              className="cursor-pointer rounded-full sm:w-8 w-4 h-4 sm:h-8 md:w-10 md:h-10 bg-gray-300 border border-gray-400"
-                              style={{ backgroundColor: color }}
+                              className="cursor-pointer rounded sm:w-8 w-9 h-5 sm:h-8 md:w-14 md:h-6 bg-gray-300 border border-gray-400"
+                              style={{
+                                backgroundColor:
+                                  localDocDefinition.qrCode.foreground,
+                              }}
                               onClick={togglePickerinput}
                             />
                             {showPicker && (
                               <div className="absolute z-10 mt-2">
                                 <SketchPicker
-                                  color={color}
+                                  color={localDocDefinition.qrCode.foreground}
                                   onChange={handleColorChangeinput}
                                 />
                               </div>
                             )}
                           </div>
-                          {/* Text input for Text/Foreground Color */}
-                          <input
-                            type="text"
-                            id="textColor"
-                            className="ml-2 sm:w-full w-16 px-3 py-1 border border-gray-300 focus:outline-none focus:border-blue-500"
-                            style={{ backgroundColor: color, color: "#000" }}
-                            readOnly
-                          />
                         </div>
-
                         {/* Background Color */}
                         <div className="flex items-center mb-2 md:mb-0 ml-0 md:ml-4">
                           <label htmlFor="textColor2" className="mr-2">
@@ -972,30 +1085,22 @@ const Setting = () => {
                           <div className="relative">
                             {/* Color Picker for Background Color */}
                             <div
-                              className="cursor-pointer rounded-full w-4 sm:w-8 h-4 sm:h-8 md:w-10 md:h-10 bg-gray-300 border border-gray-400"
-                              style={{ backgroundColor: color2 }}
+                              className="cursor-pointer rounded w-9 sm:w-8 h-5 sm:h-8 md:w-14 md:h-6 bg-gray-300 border border-gray-400"
+                              style={{
+                                backgroundColor:
+                                  localDocDefinition.qrCode.background,
+                              }}
                               onClick={togglePickerinput2}
                             />
                             {showPicker2 && (
                               <div className="absolute z-10 mt-2">
                                 <SketchPicker
-                                  color={color2}
+                                  color={localDocDefinition.qrCode.background}
                                   onChange={handleColorChangeinput2}
                                 />
                               </div>
                             )}
                           </div>
-                          {/* Text input for Background Color */}
-                          <input
-                            type="text"
-                            id="textColor2"
-                            className="ml-2 px-3 py-1 border sm:w-full w-16 border-gray-300 focus:outline-none focus:border-blue-500"
-                            style={{
-                              backgroundColor: color2,
-                              color: "#FFFFFF",
-                            }}
-                            readOnly
-                          />
                         </div>
 
                         {/* ECC Level */}
@@ -1007,6 +1112,8 @@ const Setting = () => {
                             className="form-select mr-2 costom-dark-mod-input outline-none"
                             name="qrCodeEccLevel"
                             id="qrCodeEccLevel"
+                            value={localDocDefinition.qrCode.eccLevel}
+                            onChange={handleEccLevelChange}
                           >
                             <option value="L">Low</option>
                             <option value="M">Medium</option>
@@ -1037,7 +1144,7 @@ const Setting = () => {
             <div className="border border-black pb-8 rounded">
               <div className="md:grid grid-cols-12 gap-5 px-4 md:space-y-0 space-y-5 ">
                 <div className="lg:col-span-3 md:col-span-4 border border-black">
-                  <Card>
+                  {/* <Card>
                     <CardActionArea>
                       <CardMedia
                         component="img"
@@ -1053,6 +1160,43 @@ const Setting = () => {
                           type="radio"
                           name="template"
                           style={{ display: "none" }} // Hide the actual radio button
+                          onChange={() => setSelectedTemplate("Template 1")}
+                        />
+                        <Button
+                          size="small"
+                          style={{
+                            backgroundColor:
+                              selectedTemplate === "Template 1"
+                                ? "#1976d2"
+                                : "white",
+                            color:
+                              selectedTemplate === "Template 1"
+                                ? "white"
+                                : "black",
+                          }}
+                          onClick={() => setSelectedTemplate("Template 1")}
+                        >
+                          Template 1
+                        </Button>
+                      </label>
+                    </CardActions>
+                  </Card> */}
+                  <Card>
+                    <CardActionArea>
+                      <CardMedia
+                        component="img"
+                        height="140"
+                        image="/Template/Template 1.jpg"
+                        alt="Template 1"
+                      />
+                      <CardContent></CardContent>
+                    </CardActionArea>
+                    <CardActions className="costom-dark-mod-input">
+                      <label>
+                        <input
+                          type="radio"
+                          name="template"
+                          style={{ display: "none" }}
                           onChange={() => handleTemplateSelect("Template 1")}
                         />
                         <Button
@@ -1082,7 +1226,7 @@ const Setting = () => {
                         component="img"
                         height="140"
                         image="/Template/Template 2.jpg"
-                        alt="green iguana"
+                        alt="Template 1"
                       />
                       <CardContent></CardContent>
                     </CardActionArea>
@@ -1091,7 +1235,7 @@ const Setting = () => {
                         <input
                           type="radio"
                           name="template"
-                          style={{ display: "none" }} // Hide the actual radio button
+                          style={{ display: "none" }}
                           onChange={() => handleTemplateSelect("Template 2")}
                         />
                         <Button
@@ -1121,7 +1265,7 @@ const Setting = () => {
                         component="img"
                         height="140"
                         image="/Template/Template 3.jpg"
-                        alt="green iguana"
+                        alt="Template 3"
                       />
                       <CardContent></CardContent>
                     </CardActionArea>
@@ -1130,7 +1274,7 @@ const Setting = () => {
                         <input
                           type="radio"
                           name="template"
-                          style={{ display: "none" }} // Hide the actual radio button
+                          style={{ display: "none" }}
                           onChange={() => handleTemplateSelect("Template 3")}
                         />
                         <Button
@@ -1159,8 +1303,8 @@ const Setting = () => {
                       <CardMedia
                         component="img"
                         height="140"
-                        image="/Template/Template 2.jpg"
-                        alt="green iguana"
+                        image="/Template/Template 4.jpg"
+                        alt="Template 4"
                       />
                       <CardContent></CardContent>
                     </CardActionArea>
@@ -1169,7 +1313,7 @@ const Setting = () => {
                         <input
                           type="radio"
                           name="template"
-                          style={{ display: "none" }} // Hide the actual radio button
+                          style={{ display: "none" }}
                           onChange={() => handleTemplateSelect("Template 4")}
                         />
                         <Button
@@ -1199,7 +1343,7 @@ const Setting = () => {
                         component="img"
                         height="140"
                         image="/Template/Template 5.jpg"
-                        alt="green iguana"
+                        alt="Template 5"
                       />
                       <CardContent></CardContent>
                     </CardActionArea>
@@ -1208,7 +1352,7 @@ const Setting = () => {
                         <input
                           type="radio"
                           name="template"
-                          style={{ display: "none" }} // Hide the actual radio button
+                          style={{ display: "none" }}
                           onChange={() => handleTemplateSelect("Template 5")}
                         />
                         <Button
@@ -1237,8 +1381,8 @@ const Setting = () => {
                       <CardMedia
                         component="img"
                         height="140"
-                        image="/Template/Template 2.jpg"
-                        alt="green iguana"
+                        image="/Template/Template 6.jpg"
+                        alt="Template 6"
                       />
                       <CardContent></CardContent>
                     </CardActionArea>
@@ -1247,7 +1391,7 @@ const Setting = () => {
                         <input
                           type="radio"
                           name="template"
-                          style={{ display: "none" }} // Hide the actual radio button
+                          style={{ display: "none" }}
                           onChange={() => handleTemplateSelect("Template 6")}
                         />
                         <Button
@@ -1282,3 +1426,6 @@ const Setting = () => {
 export default Setting;
 
 // https://en.wikipedia.org/wiki/QR_code#Error_correction
+
+// https://invoice-generator.surge.sh/
+// https://invoice-phi-nine.vercel.app/
