@@ -23,7 +23,6 @@ import {
   deleteDoc,
   doc,
   getDocs,
-  setDoc,
   updateDoc,
 } from "firebase/firestore";
 import { db } from "../firebase/firebase";
@@ -55,17 +54,6 @@ const Home = ({ darkMode, toggleDarkMode }) => {
 
 //---------------------------------------------------
 
-// const getDefaltSettingValue = localStorage.getItem("defaultSettings");
-// console.log("getDefaltSettingValue",getDefaltSettingValue)
-
-// const parsedSettings = JSON.parse(getDefaltSettingValue);
-// console.log("testing", parsedSettings.taxation);
-
-
-
-
-
-
 const [image,setImage] = useState(initialImage || null)
 const [taxation, setTaxation] = useState("GST");
 const [currency,setCurrency] = useState("INR");
@@ -77,32 +65,28 @@ const [discounts,setDiscounts] = useState(initialDiscounts || 0)
 const [shipping,setShipping] = useState(initialShipping || 0)
 const [autoDueDays,setAutoDueDays] = useState(0)
 const [autoDueDate,setAutoDueDate] = useState("")
-const [taxationPer,setTaxationPer] = useState(0)
-console.log("taxationPer",taxationPer)
-
+const [gst,setGst] = useState(0)
 
 
 useEffect(() => {
   const getDefaltSettingValue = localStorage.getItem("defaultSettings");
-  console.log("getDefaltSettingValue", getDefaltSettingValue);
 
   if (getDefaltSettingValue) {
     const parsedSettings = JSON.parse(getDefaltSettingValue);
-    console.log("parsedSettings", parsedSettings);
 
-    // Update taxation state with the parsed value
-    // setImage(parsedSettings.image)
+    // Update rows state with parsedSettings gst value
+    const updatedRows = rows.map(row => ({
+      ...row,
+      gst: parsedSettings.gst.toString(), // Ensure gst is a string if necessary
+    }));
+
+    setRows(updatedRows);
     setTaxation(parsedSettings.taxation);
     setCurrency(parsedSettings.currency);
     setinvoiceNo(parsedSettings.invoiceNo);
-    // setInvoiceFrom(parsedSettings.invoiceFrom)
-    // setTermsAndConditions(parsedSettings.termsAndConditions)
-    // setFootNote(parsedSettings.footNote)
-    // setDiscounts(parsedSettings.discounts)
-    // setShipping(parsedSettings.shipping)
-    setAutoDueDays(parsedSettings.autoDueDays)
-    setAutoDueDate(parsedSettings.autoDueDate)
-    setTaxationPer(parsedSettings.taxationPer)
+    setAutoDueDays(parsedSettings.autoDueDays);
+    setAutoDueDate(parsedSettings.autoDueDate);
+    setGst(parsedSettings.gst);
 
     if (!initialInvoiceFrom) {
       setInvoiceFrom(parsedSettings.invoiceFrom);
@@ -127,18 +111,11 @@ useEffect(() => {
     if (!initialImage) {
       setImage(parsedSettings.image);
     }
-
   }
 }, []);
 
 
 //---------------------------------------------------            
-
-
-
-
-
- 
   const fileInputRef = useRef(null);
   const [isImageSelected, setIsImageSelected] = useState(true);
   const [invoice, setInvoice] = useState( initialInvoice || "Invoice No: ");
@@ -170,29 +147,20 @@ useEffect(() => {
     }
   }, [autoDueDate, autoDueDays]);
 
-
-
-
-
-
-  // const [invoiceFrom, setInvoicefrom] = useState( initialInvoiceFrom || "");
   const [invoiceTo, setInvoiceTo] = useState( initialInvoiceTo || "");
   const [itemValue, setItemValue] = useState(initialItemValue || 0);
-  // const [discounts, setDiscounts] = useState(initialDiscounts || 0);
-  // const [shipping, setShipping] = useState(initialShipping || 0);
-  // const [termsAndConditions, setTermsAndConditions] = useState( initialTermsAndConditions|| "");
-  // const [footNote, setFootNote] = useState(initialFootNote || "");
-  // const [image, setImage] = useState(initialImage || null);
+
   const [rows, setRows] = useState( initialRows || [
      {
       id: 1,
       item: "",
       quantity: "0",
       rate: "0",
-      gst: "0",
+      gst: 0,
       amount: "0",
     },
   ]);
+
 const [saveInvoiceGetFirebase ,setSaveInvoiceGetFirebase] = useState([])
   const [currentInvoice, setCurrentInvoice] = useState(rows);
   const [saveInvoice, setSaveInvoice] = useState([]);
@@ -361,22 +329,27 @@ const [saveInvoiceGetFirebase ,setSaveInvoiceGetFirebase] = useState([])
 
   const handleDeleteInvoice = async (invoiceId) => {
     try {
-      // console.log("Deleting invoice with ID: ", invoiceId);
-
-      // Delete invoice from Firestore
-      await deleteDoc(doc(db, "invoices", invoiceId));
-      // console.log("Invoice deleted successfully");
-
-      // Update saveInvoice state to remove the deleted invoice
-      setSaveInvoiceGetFirebase((prevInvoices) =>
-        prevInvoices.filter((invoice) => invoice.uid !== invoiceId)
+      // Display confirmation dialog before deleting
+      const confirmed = window.confirm("Are you sure you want to delete this invoice?");
       
+      if (!confirmed) {
+        return; // If user cancels deletion, exit function
+      }
+  
+      // Proceed with deletion if confirmed
+      await deleteDoc(doc(db, "invoices", invoiceId));
+  
+      // Update saveInvoice state to remove the deleted invoice
+      setSaveInvoiceGetFirebase(prevInvoices =>
+        prevInvoices.filter(invoice => invoice.uid !== invoiceId)
       );
-      toast.success("Delete Invoice SuccessFully!")
+  
+      toast.error("Delete Invoice Successfully!");
     } catch (error) {
       console.error("Error deleting invoice: ", error);
     }
   };
+  
 
   useEffect(() => {
     // console.log("useEffect-saveInvoice: ", saveInvoice);
@@ -398,10 +371,10 @@ const [saveInvoiceGetFirebase ,setSaveInvoiceGetFirebase] = useState([])
       {
         id: 1,
         item: "",
-        quantity: "0",
+        quantity: 0,
         rate: "0",
-        gst: "0",
-        amount: "0",
+        gst:gst,
+        amount: 0,
       },
     ]);
     setItemValue(0);
@@ -416,7 +389,7 @@ const [saveInvoiceGetFirebase ,setSaveInvoiceGetFirebase] = useState([])
       item: "",
       quantity: "",
       rate: "",
-      gst: "",
+      gst:gst ,
       amount: "",
     };
     setRows([...rows, newRow]);
@@ -523,23 +496,19 @@ const [saveInvoiceGetFirebase ,setSaveInvoiceGetFirebase] = useState([])
   
 
   const handleInvoiceChange = (e) => {
-    // setInvoice(e.target.value);
     setinvoiceNo(e.target.value);
-    // console.log("invoice text", invoice);
   };
 
   const handleidNumberChange = (e) => {
     setIdNumber(e.target.value);
-    // console.log("Invoice No: number ", idNumber);
   };
 
   const handleDateChange = (date) => {
     setInvoiceDate(date);
-    // console.log("Selected invoice date:", date);
   };
 
   const handleDueDateChange = (date) => {
-    setDueDat(date); // Update dueDat state with date object
+    setDueDat(date); 
   };
 
   const calculateSubtotal = () => {
@@ -1448,6 +1417,7 @@ const [saveInvoiceGetFirebase ,setSaveInvoiceGetFirebase] = useState([])
   const isSmallScreen = useMediaQuery("(max-width:767px)");
   return (
     <>
+    
      <ToastContainer position="top-center" />
       <NavBar  darkMode={darkMode} toggleDarkMode={toggleDarkMode}  />
       <div className="px-2 costom-dark-mod">
@@ -1529,15 +1499,12 @@ const [saveInvoiceGetFirebase ,setSaveInvoiceGetFirebase] = useState([])
                       <DatePicker
                         id="invoiceDate"
                         selected={invoiceDate}
-                        // selected={new Date(invoiceDate)}
                         onChange={handleDateChange}
-                        // onChange={date => setInvoiceDate(date)}
                         customInput={
                           <div className="relative">
                             <input
                               type="text"
                               value={formattedInvoiceDate} // Ensure to format the date correctly if needed
-                              // value={invoiceDate}
                               onChange={handleDateChange} // Handle date changes if needed
                               className="border border-gray-300 p-2 pl-10 w-full rounded-lg costom-dark-mod-input"
                               placeholder="Select date"
@@ -1573,9 +1540,7 @@ const [saveInvoiceGetFirebase ,setSaveInvoiceGetFirebase] = useState([])
                             <input
                               type="text"
                               value={formattedDueDat} // Ensure to format the date correctly if needed
-                              onChange={(e) =>
-                                handleDueDateChange(e.target.value)
-                              } // Handle date changes if needed
+                              onChange={(e) => handleDueDateChange(e.target.value)} 
                               className="border border-gray-300 p-2 pl-10 w-full rounded-lg costom-dark-mod-input"
                               placeholder="DD-MM-YYYY"
                               aria-label="Due Date"
@@ -1600,7 +1565,6 @@ const [saveInvoiceGetFirebase ,setSaveInvoiceGetFirebase] = useState([])
                 <p>Invoice from</p>
                 <div>
                   <textarea
-                    // value={invoiceFrom}
                     value={invoiceFrom}
 
                     onChange={(e) => setInvoiceFrom(e.target.value)}

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
@@ -7,7 +7,6 @@ import NavBar from "../navBar/NavBar";
 import { GrDownload } from "react-icons/gr";
 import { BsFillCaretDownFill } from "react-icons/bs";
 import { SketchPicker } from "react-color";
-// import Switch from "@mui/material/Switch";
 import { Switch } from "antd";
 import { Link } from "react-router-dom";
 import Card from "@mui/material/Card";
@@ -86,6 +85,7 @@ function a11yProps(index) {
 
 const Setting = () => {
   const [value, setValue] = useState(0);
+
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
@@ -106,7 +106,7 @@ const Setting = () => {
     image: null,
     currency: "INR",
     taxation: "GST",
-    taxationPer: 0,
+    gst: 0,
     discounts: 0,
     shipping: 0,
     invoiceNo: "Invoice No ",
@@ -164,7 +164,6 @@ const Setting = () => {
   const [isImageSelected, setIsImageSelected] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
   const [isOpenTex, setIsOpenTex] = useState(false);
-  // const [checked, setChecked] = useState(false);
 
   const handleCheckboxChange = () => {
     const newChecked = !isChecked;
@@ -230,7 +229,7 @@ const Setting = () => {
   const handleTaxationPer = (selectedTaxationPer) => {
     setLocalDefaultSetting((prevSettings) => ({
       ...prevSettings,
-      taxationPer: selectedTaxationPer,
+      gst: selectedTaxationPer,
     }));
   };
 
@@ -285,7 +284,6 @@ const Setting = () => {
     }));
   };
 
-  // const label = { inputProps: { "aria-label": "Switch demo" } };
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -616,7 +614,7 @@ const Setting = () => {
                               </label>
                               <input
                                 type="number"
-                                value={localDefaultSetting.taxationPer}
+                                value={localDefaultSetting.gst}
                                 onChange={(e) =>
                                   handleTaxationPer(e.target.value)
                                 }
@@ -1144,43 +1142,6 @@ const Setting = () => {
             <div className="border border-black pb-8 rounded">
               <div className="md:grid grid-cols-12 gap-5 px-4 md:space-y-0 space-y-5 ">
                 <div className="lg:col-span-3 md:col-span-4 border border-black">
-                  {/* <Card>
-                    <CardActionArea>
-                      <CardMedia
-                        component="img"
-                        height="140"
-                        image="/Template/Template 1.jpg"
-                        alt="green iguana"
-                      />
-                      <CardContent></CardContent>
-                    </CardActionArea>
-                    <CardActions className="costom-dark-mod-input">
-                      <label>
-                        <input
-                          type="radio"
-                          name="template"
-                          style={{ display: "none" }} // Hide the actual radio button
-                          onChange={() => setSelectedTemplate("Template 1")}
-                        />
-                        <Button
-                          size="small"
-                          style={{
-                            backgroundColor:
-                              selectedTemplate === "Template 1"
-                                ? "#1976d2"
-                                : "white",
-                            color:
-                              selectedTemplate === "Template 1"
-                                ? "white"
-                                : "black",
-                          }}
-                          onClick={() => setSelectedTemplate("Template 1")}
-                        >
-                          Template 1
-                        </Button>
-                      </label>
-                    </CardActions>
-                  </Card> */}
                   <Card>
                     <CardActionArea>
                       <CardMedia
