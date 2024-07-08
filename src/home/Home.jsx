@@ -536,6 +536,7 @@ const [saveInvoiceGetFirebase ,setSaveInvoiceGetFirebase] = useState([])
     setShipping(parseFloat(value));
   };
 
+
   const handleDownloadPdfFirst = () => {
     // Create a container div for the bill content
     toast.success("Download Invoice SuccessFully!")
